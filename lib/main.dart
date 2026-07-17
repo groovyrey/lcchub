@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'theme/app_theme.dart';
 import 'models/models.dart';
@@ -10,6 +11,8 @@ import 'api/portal_api.dart';
 import 'services/session_storage.dart';
 import 'services/notification_service.dart';
 import 'services/version_check_service.dart';
+import 'services/offline_service.dart';
+import 'services/push_service.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/grades/grades_screen.dart';
@@ -27,6 +30,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService.init();
+  PushService.init();
   runApp(const PortalApp());
 }
 
@@ -352,6 +356,7 @@ class _AppScaffoldState extends State<AppScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -366,7 +371,25 @@ class _AppScaffoldState extends State<AppScaffold> {
       ),
       drawer: _buildDrawer(context),
       endDrawer: const NotificationDrawer(),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          if (state.isOffline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+              color: AppColors.warning.withValues(alpha: 0.15),
+              child: Row(
+                children: [
+                  Icon(PhosphorIcons.warningCircle(), size: 14, color: AppColors.warning),
+                  const SizedBox(width: 8),
+                  Text('No connection — showing cached data',
+                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 
@@ -576,6 +599,11 @@ class AppState extends ChangeNotifier {
   String _sortOrder = 'recent';
   int _communityOffset = 0;
 
+  bool _isOffline = false;
+  DateTime? _lastDataUpdate;
+  final _offlineService = OfflineService();
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+
   CommunityPost? _postDetail;
   List<CommunityComment> _postComments = [];
   bool _isPostLoading = false;
@@ -619,13 +647,18 @@ class AppState extends ChangeNotifier {
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
   VersionInfo? get pendingUpdate => _pendingUpdate;
 
+  bool get isOffline => _isOffline;
+  DateTime? get lastDataUpdate => _lastDataUpdate;
+
   Future<void> init() async {
     await _storage.init();
+    await _offlineService.init();
     _isLoggedIn = _storage.isLoggedIn;
     _student = _storage.studentData;
     _remindersEnabled = _storage.remindersEnabled;
     _themeMode = _parseThemeMode(_storage.themeMode);
     PortalApi.init(_storage.baseUrl, _storage);
+    _initConnectivity();
     if (_student != null) {
       _reports = _student?.availableReports ?? [];
     }
@@ -636,6 +669,7 @@ class AppState extends ChangeNotifier {
       _startDataRefreshTimer();
       startNotifPolling();
       _loadCommunity();
+      _registerDevice();
     }
   }
 
@@ -692,6 +726,7 @@ class AppState extends ChangeNotifier {
       _loadCommunity();
       _startDataRefreshTimer();
       startNotifPolling();
+      _registerDevice();
     } else {
       _error = result['error']?.toString() ?? 'Login failed';
     }
@@ -730,44 +765,6 @@ class AppState extends ChangeNotifier {
       _storage.studentData = student;
       notifyListeners();
     }
-  }
-
-  Future<void> loadGrades(ReportLink report) async {
-    if (_loadedGrades.containsKey(report.href)) return;
-    _loadingSemesterHref = report.href;
-    notifyListeners();
-
-    final result = await PortalApi.getGrades(report.href, reportName: report.text);
-    if (result['success'] == true) {
-      _loadedGrades[report.href] = result['subjects'] as List<SubjectGrade>;
-    }
-    _loadingSemesterHref = null;
-    notifyListeners();
-  }
-
-  Future<void> _loadCommunity({bool refresh = false}) async {
-    if (refresh) {
-      _communityOffset = 0;
-      _communityPosts = [];
-    }
-    _isCommunityLoading = true;
-    notifyListeners();
-
-    final response = await PortalApi.getCommunityPosts(
-      topic: _selectedTopic,
-      search: _searchQuery,
-      sort: _sortOrder,
-      offset: _communityOffset,
-    );
-    if (_communityOffset == 0) {
-      _communityPosts = response.posts;
-    } else {
-      _communityPosts = [..._communityPosts, ...response.posts];
-    }
-    _hasMorePosts = response.hasMore;
-    _communityOffset += response.posts.length;
-    _isCommunityLoading = false;
-    notifyListeners();
   }
 
   void refreshCommunity() => _loadCommunity(refresh: true);
@@ -1162,6 +1159,99 @@ class AppState extends ChangeNotifier {
     if (_remindersEnabled && _student?.schedule != null && _student!.schedule!.isNotEmpty) {
       NotificationService.scheduleDailyReminder(_student!.schedule!);
     }
+  }
+
+  // ── Connectivity & Offline Loading ────────────────────────────────
+
+  void _initConnectivity() {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      final wasOffline = _isOffline;
+      _isOffline = results.isEmpty || results.every((r) => r == ConnectivityResult.none);
+      if (wasOffline && !_isOffline) {
+        _onReconnect();
+      }
+      notifyListeners();
+    });
+    Connectivity().checkConnectivity().then((results) {
+      _isOffline = results.isEmpty || results.every((r) => r == ConnectivityResult.none);
+      notifyListeners();
+      if (!_isOffline && _isLoggedIn) {
+        _refreshInBackground();
+      }
+    });
+  }
+
+  void _onReconnect() {
+    _lastDataUpdate = DateTime.now();
+    _refreshInBackground();
+    _loadCommunity(refresh: true);
+  }
+
+  void _registerDevice() {
+    final token = PushService.deviceToken;
+    if (token != null && token.isNotEmpty) {
+      PortalApi.registerDeviceToken(token);
+    }
+  }
+
+  Future<void> loadGrades(ReportLink report) async {
+    if (_loadedGrades.containsKey(report.href)) return;
+    _loadingSemesterHref = report.href;
+    notifyListeners();
+
+    if (_isOffline) {
+      _loadedGrades = _offlineService.cachedGrades;
+      _loadingSemesterHref = null;
+      notifyListeners();
+      return;
+    }
+
+    final result = await PortalApi.getGrades(report.href, reportName: report.text);
+    if (result['success'] == true) {
+      _loadedGrades[report.href] = result['subjects'] as List<SubjectGrade>;
+      _offlineService.saveGrades(_loadedGrades);
+    }
+    _loadingSemesterHref = null;
+    notifyListeners();
+  }
+
+  Future<void> _loadCommunity({bool refresh = false}) async {
+    if (refresh) {
+      _communityOffset = 0;
+      _communityPosts = [];
+    }
+    _isCommunityLoading = true;
+    notifyListeners();
+
+    if (_isOffline) {
+      _communityPosts = _offlineService.cachedPosts;
+      _isCommunityLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final response = await PortalApi.getCommunityPosts(
+      topic: _selectedTopic,
+      search: _searchQuery,
+      sort: _sortOrder,
+      offset: _communityOffset,
+    );
+    if (_communityOffset == 0) {
+      _communityPosts = response.posts;
+    } else {
+      _communityPosts = [..._communityPosts, ...response.posts];
+    }
+    _hasMorePosts = response.hasMore;
+    _communityOffset += response.posts.length;
+    _isCommunityLoading = false;
+    if (refresh) _offlineService.savePosts(_communityPosts);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _connectivitySub?.cancel();
+    super.dispose();
   }
 }
 

@@ -441,6 +441,21 @@ class PortalApi {
     }
   }
 
+  static Future<bool> registerDeviceToken(String token) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/student/notifications'),
+        headers: _headers(),
+        body: jsonEncode({'action': 'registerDevice', 'token': token}),
+      );
+      _updateCookies(response);
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Stream<String> chatStream(List<Map<String, String>> messages) async* {
     final request = http.Request('POST', Uri.parse('$_baseUrl/api/ai/assistant'));
     request.headers.addAll(_headers());
