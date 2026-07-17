@@ -103,7 +103,6 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
   late final Animation<double> _logoOpacity;
   late final Animation<double> _titleOpacity;
   late final Animation<Offset> _titleSlide;
-  late final Animation<double> _subtitleOpacity;
   late final Animation<double> _loaderOpacity;
 
   @override
@@ -117,7 +116,6 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
     _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _logoController, curve: const Interval(0.0, 0.5)));
     _titleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _textController, curve: const Interval(0.0, 0.6)));
     _titleSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
-    _subtitleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _textController, curve: const Interval(0.4, 1.0)));
     _loaderOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _loaderController, curve: Curves.easeIn));
 
     _logoController.forward().then((_) {
@@ -200,25 +198,6 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              AnimatedBuilder(
-                animation: _textController,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _subtitleOpacity.value,
-                    child: child,
-                  );
-                },
-                child: Text(
-                  'Student Portal',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 1.2,
                   ),
                 ),
               ),

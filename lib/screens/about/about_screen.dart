@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../theme/app_theme.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _version = '${info.version}+${info.buildNumber}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +57,7 @@ class AboutScreen extends StatelessWidget {
         const SizedBox(height: 12),
         _infoCard('Features', '• View grades and academic records\n• Check financial status and payments\n• Browse community posts\n• AI-powered assistant\n• Daily schedule reminders'),
         const SizedBox(height: 12),
-        _infoCard('Version', '1.0.0'),
+        _infoCard('Version', _version),
       ],
     );
   }

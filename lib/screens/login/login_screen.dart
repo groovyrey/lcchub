@@ -67,9 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 10))],
                     ),
                     child: Column(
                       children: [
@@ -123,12 +123,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: widget.isLoading ? null : _login,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.surface,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               elevation: 0,
                             ),
                             child: widget.isLoading
-                                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.surface, strokeWidth: 2))
                                 : Text('Sign In', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
                           ),
                         ),
