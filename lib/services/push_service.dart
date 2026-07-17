@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -22,6 +23,7 @@ class PushService {
       await Firebase.initializeApp();
       _messaging = FirebaseMessaging.instance;
       _initialized = true;
+      debugPrint('[Push] Firebase initialized');
 
       // Request permission
       final settings = await _messaging!.requestPermission(
@@ -30,6 +32,15 @@ class PushService {
         sound: true,
         provisional: false,
       );
+      debugPrint('[Push] Permission status: ${settings.authorizationStatus}');
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        _deviceToken = await _messaging!.getToken();
+        debugPrint('[Push] Device token: $_deviceToken');
+      } else {
+        debugPrint('[Push] Permission denied');
+      }
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {

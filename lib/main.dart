@@ -1191,6 +1191,13 @@ class AppState extends ChangeNotifier {
     final token = PushService.deviceToken;
     if (token != null && token.isNotEmpty) {
       PortalApi.registerDeviceToken(token);
+    } else {
+      Future.delayed(const Duration(seconds: 3), () {
+        final retryToken = PushService.deviceToken;
+        if (retryToken != null && retryToken.isNotEmpty) {
+          PortalApi.registerDeviceToken(retryToken);
+        }
+      });
     }
   }
 
