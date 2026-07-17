@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class AccountsScreen extends StatelessWidget {
   final Financials? financials;
   final VoidCallback onRefresh;
@@ -16,7 +17,7 @@ class AccountsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long, size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+            Icon(PhosphorIcons.receipt(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text('No financial data available', style: GoogleFonts.poppins(fontSize: 16, color: AppColors.onSurfaceVariant)),
           ],
@@ -94,7 +95,7 @@ class AccountsScreen extends StatelessWidget {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: const Icon(Icons.check_circle, color: AppColors.secondary, size: 20),
+            child: Icon(PhosphorIcons.checkCircle(PhosphorIconsStyle.fill), color: AppColors.secondary, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -133,7 +134,7 @@ class AccountsScreen extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isPaid ? Icons.check_circle_outline : Icons.schedule,
+              isPaid ? PhosphorIcons.checkCircle() : PhosphorIcons.clock(),
               color: isPaid ? AppColors.success : AppColors.warning,
               size: 20,
             ),

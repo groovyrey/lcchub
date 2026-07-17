@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class LoginScreen extends StatefulWidget {
   final bool isLoading;
   final String? error;
@@ -79,9 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Student ID',
-                            prefixIcon: const Icon(Icons.person_outline),
+                            prefixIcon: Icon(PhosphorIcons.user()),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary)),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -90,13 +91,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icon(PhosphorIcons.lock()),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                              icon: Icon(_obscurePassword ? PhosphorIcons.eyeSlash() : PhosphorIcons.eye()),
                               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary)),
                           ),
                           onSubmitted: (_) => _login(),
                         ),
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                                Icon(PhosphorIcons.warningCircle(), color: AppColors.error, size: 20),
                                 const SizedBox(width: 8),
                                 Expanded(child: Text(widget.error!, style: GoogleFonts.poppins(color: AppColors.error, fontSize: 13))),
                               ],

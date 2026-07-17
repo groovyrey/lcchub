@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class GradesScreen extends StatefulWidget {
   final List<ReportLink> reports;
   final Map<String, List<SubjectGrade>> loadedGrades;
@@ -55,10 +56,10 @@ class _GradesScreenState extends State<GradesScreen> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search subjects...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
+                  prefixIcon: Icon(PhosphorIcons.magnifyingGlass(), size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18),
+                          icon: Icon(PhosphorIcons.x(), size: 18),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -88,7 +89,7 @@ class _GradesScreenState extends State<GradesScreen> {
                 return FilterChip(
                   avatar: isLoading
                       ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                      : isLoaded ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+                      : isLoaded ? Icon(PhosphorIcons.check(), size: 14, color: Colors.white) : null,
                   label: Text(report.text, style: GoogleFonts.poppins(fontSize: 12, color: isSelected ? Colors.white : AppColors.onSurface)),
                   selected: isSelected,
                   onSelected: (_) {
@@ -136,10 +137,10 @@ class _GradesScreenState extends State<GradesScreen> {
           Container(
             width: 80, height: 80,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+              gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.school, size: 40, color: Colors.white),
+            child: Icon(PhosphorIcons.graduationCap(PhosphorIconsStyle.fill), size: 40, color: Colors.white),
           ),
           const SizedBox(height: 20),
           Text('Grade Reports', style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
@@ -156,7 +157,7 @@ class _GradesScreenState extends State<GradesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+          Icon(PhosphorIcons.magnifyingGlassMinus(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
           Text('No subjects found', style: GoogleFonts.poppins(fontSize: 16, color: AppColors.onSurfaceVariant)),
         ],
@@ -223,7 +224,7 @@ class _GradesScreenState extends State<GradesScreen> {
               color: gradeColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.book_outlined, color: gradeColor, size: 20),
+            child: Icon(PhosphorIcons.bookmark(), color: gradeColor, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(

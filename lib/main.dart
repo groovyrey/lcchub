@@ -2,12 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'theme/app_theme.dart';
 import 'models/models.dart';
 import 'api/portal_api.dart';
 import 'services/session_storage.dart';
 import 'services/notification_service.dart';
+import 'services/version_check_service.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/grades/grades_screen.dart';
@@ -21,6 +23,7 @@ import 'screens/assistant/assistant_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'widgets/notification_drawer.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService.init();
@@ -34,11 +37,24 @@ class PortalApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AppState()..init(),
-      child: MaterialApp(
-        title: 'LCC Hub',
-        theme: buildAppTheme(),
-        debugShowCheckedModeBanner: false,
-        home: const SplashWrapper(),
+      child: Consumer<AppState>(
+        builder: (context, state, _) {
+          final brightness = state.themeMode == ThemeMode.system
+              ? WidgetsBinding.instance.platformDispatcher.platformBrightness
+              : state.themeMode == ThemeMode.dark
+                  ? Brightness.dark
+                  : Brightness.light;
+          AppColors.setThemeBrightness(brightness);
+
+          return MaterialApp(
+            title: 'LCC Hub',
+            theme: buildAppTheme(),
+            darkTheme: buildDarkTheme(),
+            themeMode: state.themeMode,
+            debugShowCheckedModeBanner: false,
+            home: const SplashWrapper(),
+          );
+        },
       ),
     );
   }
@@ -232,19 +248,93 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
   }
 }
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
   static const _screens = ['dashboard', 'grades', 'accounts', 'community', 'assistant', 'settings', 'about'];
   static const _labels = ['Home', 'Grades', 'Accounts', 'Community', 'Assistant', 'Settings', 'About'];
-  static const _icons = [
-    Icons.home_rounded, Icons.grade_rounded, Icons.receipt_long_rounded,
-    Icons.forum_rounded, Icons.smart_toy_rounded, Icons.settings_rounded, Icons.info_rounded,
+  static final _icons = [
+    PhosphorIcons.house(), PhosphorIcons.exam(), PhosphorIcons.receipt(),
+    PhosphorIcons.chats(PhosphorIconsStyle.fill), PhosphorIcons.robot(PhosphorIconsStyle.fill), PhosphorIcons.gearSix(), PhosphorIcons.info(),
   ];
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  bool _updateShown = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _maybeShowUpdate();
+  }
+
+  void _maybeShowUpdate() {
+    if (_updateShown) return;
+    final update = context.read<AppState>().pendingUpdate;
+    if (update == null) return;
+    _updateShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showUpdateDialog(update));
+  }
+
+  void _showUpdateDialog(VersionInfo info) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(PhosphorIcons.download(), color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text('Update Available', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Version ${info.latestVersion} is available.', style: GoogleFonts.poppins(fontSize: 14)),
+            const SizedBox(height: 4),
+            Text('You are on v${info.currentVersion}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+            if (info.changelog.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text('What\'s New:', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              Text(info.changelog, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant), maxLines: 6, overflow: TextOverflow.ellipsis),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.read<AppState>().dismissUpdate();
+              Navigator.pop(ctx);
+            },
+            child: Text('Later', style: GoogleFonts.poppins()),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final uri = Uri.parse(info.downloadUrl);
+              if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+              if (ctx.mounted) {
+                context.read<AppState>().dismissUpdate();
+                Navigator.pop(ctx);
+              }
+            },
+            child: Text('Download', style: GoogleFonts.poppins()),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    _maybeShowUpdate();
 
     if (!state.isLoggedIn) {
       return LoginScreen(
@@ -255,7 +345,7 @@ class AppShell extends StatelessWidget {
       );
     }
 
-    return AppScaffold(state: state, screens: _screens, labels: _labels, icons: _icons);
+    return AppScaffold(state: state, screens: AppShell._screens, labels: AppShell._labels, icons: AppShell._icons);
   }
 }
 
@@ -288,7 +378,7 @@ class _AppScaffoldState extends State<AppScaffold> {
       appBar: AppBar(
         title: Text(widget.labels[_currentIndex], style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
         leading: IconButton(
-          icon: const Icon(Icons.menu_rounded),
+          icon: Icon(PhosphorIcons.list()),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         actions: [
@@ -308,7 +398,7 @@ class _AppScaffoldState extends State<AppScaffold> {
       icon: Badge(
         isLabelVisible: count > 0,
         label: count > 99 ? const Text('99+') : null,
-        child: const Icon(Icons.notifications_none_rounded),
+        child: Icon(PhosphorIcons.bell()),
       ),
       onPressed: () {
         state.loadNotifications();
@@ -387,16 +477,6 @@ class _AppScaffoldState extends State<AppScaffold> {
               },
             ),
           ),
-          const Divider(indent: 24, endIndent: 24),
-          ListTile(
-            leading: const Icon(Icons.logout_rounded, color: AppColors.error),
-            title: Text('Logout', style: GoogleFonts.poppins(color: AppColors.error)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-            onTap: () {
-              Navigator.pop(context);
-              state.logout();
-            },
-          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -432,6 +512,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         onAuthorTap: (userId) => _openProfile(context, userId),
         onCreatePost: () => _createPost(context),
         onLoadMore: () => state.loadMorePosts(),
+        onRefresh: () => state.refreshCommunity(),
       ),
       'assistant' => AssistantScreen(
         messages: state.chatMessages,
@@ -445,6 +526,8 @@ class _AppScaffoldState extends State<AppScaffold> {
         student: state.student,
         notificationsEnabled: state.remindersEnabled,
         onNotificationToggle: (v) => state.toggleReminders(v),
+        themeMode: state.themeMode,
+        onThemeModeChanged: (mode) => state.setThemeMode(mode),
         onLogout: () => state.logout(),
       ),
       'about' => const AboutScreen(),
@@ -528,6 +611,8 @@ class AppState extends ChangeNotifier {
 
   List<AppNotification> _notifications = [];
   bool _isNotifLoading = false;
+  VersionInfo? _pendingUpdate;
+  ThemeMode _themeMode = ThemeMode.system;
 
   bool get showSplash => _showSplash;
   bool get isLoading => _isLoading;
@@ -535,6 +620,7 @@ class AppState extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   Student? get student => _student;
   bool get remindersEnabled => _remindersEnabled;
+  ThemeMode get themeMode => _themeMode;
   List<ReportLink> get reports => _reports;
   Map<String, List<SubjectGrade>> get loadedGrades => _loadedGrades;
   String? get loadingSemesterHref => _loadingSemesterHref;
@@ -552,12 +638,14 @@ class AppState extends ChangeNotifier {
   List<AppNotification> get notifications => _notifications;
   bool get isNotifLoading => _isNotifLoading;
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
+  VersionInfo? get pendingUpdate => _pendingUpdate;
 
   Future<void> init() async {
     await _storage.init();
     _isLoggedIn = _storage.isLoggedIn;
     _student = _storage.studentData;
     _remindersEnabled = _storage.remindersEnabled;
+    _themeMode = _parseThemeMode(_storage.themeMode);
     PortalApi.init(_storage.baseUrl, _storage);
     if (_student != null) {
       _reports = _student?.availableReports ?? [];
@@ -593,6 +681,19 @@ class AppState extends ChangeNotifier {
   void finishSplash() {
     _showSplash = false;
     notifyListeners();
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    final info = await VersionCheckService.checkForUpdate();
+    if (info != null) {
+      _pendingUpdate = info;
+      notifyListeners();
+    }
+  }
+
+  void dismissUpdate() {
+    _pendingUpdate = null;
   }
 
   Future<void> login(String userId, String password) async {
@@ -689,6 +790,8 @@ class AppState extends ChangeNotifier {
     _isCommunityLoading = false;
     notifyListeners();
   }
+
+  void refreshCommunity() => _loadCommunity(refresh: true);
 
   void loadMorePosts() => _loadCommunity();
 
@@ -1060,6 +1163,20 @@ class AppState extends ChangeNotifier {
       NotificationService.cancelAll();
     }
     notifyListeners();
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _storage.themeMode = mode.name;
+    notifyListeners();
+  }
+
+  ThemeMode _parseThemeMode(String value) {
+    switch (value) {
+      case 'light': return ThemeMode.light;
+      case 'dark':  return ThemeMode.dark;
+      default:      return ThemeMode.system;
+    }
   }
 
   void _scheduleRemindersIfNeeded() {

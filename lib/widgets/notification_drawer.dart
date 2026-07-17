@@ -6,6 +6,7 @@ import '../main.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class NotificationDrawer extends StatefulWidget {
   const NotificationDrawer({super.key});
 
@@ -59,10 +60,10 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
 
   IconData _typeIcon(String type) {
     return switch (type) {
-      'success' => Icons.check_circle_rounded,
-      'warning' => Icons.warning_rounded,
-      'error' => Icons.error_rounded,
-      _ => Icons.info_rounded,
+      'success' => PhosphorIcons.checkCircle(PhosphorIconsStyle.fill),
+      'warning' => PhosphorIcons.warning(),
+      'error' => PhosphorIcons.warningCircle(PhosphorIconsStyle.fill),
+      _ => PhosphorIcons.info(),
     };
   }
 
@@ -81,7 +82,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 16, 12),
-              decoration: const BoxDecoration(color: AppColors.surface),
+              decoration: BoxDecoration(color: AppColors.surface),
               child: Row(
                 children: [
                   Text('Notifications', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -104,7 +105,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                     ),
                   ],
                   IconButton(
-                    icon: const Icon(Icons.close_rounded),
+                    icon: Icon(PhosphorIcons.x(PhosphorIconsStyle.fill)),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -181,7 +182,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: AppColors.error,
-        child: const Icon(Icons.delete_rounded, color: Colors.white),
+        child: Icon(PhosphorIcons.trash(PhosphorIconsStyle.fill), color: Colors.white),
       ),
       onDismissed: (_) => context.read<AppState>().deleteNotif(notif.id),
       child: GestureDetector(
@@ -216,7 +217,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                           Container(
                             width: 7, height: 7,
                             margin: const EdgeInsets.only(right: 6),
-                            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                            decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                           ),
                         Expanded(
                           child: Text(notif.title, style: GoogleFonts.poppins(
@@ -377,7 +378,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(hasReadAll ? Icons.notifications_none_rounded : Icons.notifications_off_rounded,
+          Icon(hasReadAll ? PhosphorIcons.bell() : PhosphorIcons.bellRinging(),
             size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           Text(hasReadAll ? 'All caught up!' : 'No notifications',

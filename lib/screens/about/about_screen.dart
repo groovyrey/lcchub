@@ -13,7 +13,7 @@ class AboutScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+            gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
             borderRadius: BorderRadius.circular(18),
           ),
           child: Column(

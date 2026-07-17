@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class CreatePostScreen extends StatefulWidget {
   final Function(String content, String? topic, bool isAnonymous, Map<String, dynamic>? poll) onSubmit;
 
@@ -68,7 +69,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           Row(
             children: [
               _toolbarIcon(
-                icon: _showPollEditor ? Icons.bar_chart : Icons.bar_chart_outlined,
+                icon: _showPollEditor ? PhosphorIcons.chartBar() : PhosphorIcons.chartBar(),
                 isActive: _showPollEditor,
                 tooltip: 'Create Poll',
                 onTap: () => setState(() {
@@ -158,7 +159,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.bar_chart, size: 16, color: AppColors.primary),
+              Icon(PhosphorIcons.chartBar(), size: 16, color: AppColors.primary),
               const SizedBox(width: 8),
               Text('Poll Options', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600)),
             ],
@@ -197,7 +198,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
                 if (_pollOptionControllers.length > 2)
                   IconButton(
-                    icon: const Icon(Icons.close, size: 18),
+                    icon: Icon(PhosphorIcons.x(), size: 18),
                     onPressed: () {
                       _pollOptionControllers[i].dispose();
                       setState(() => _pollOptionControllers.removeAt(i));
@@ -209,7 +210,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           if (_pollOptionControllers.length < 5)
             TextButton.icon(
               onPressed: () => setState(() => _pollOptionControllers.add(TextEditingController())),
-              icon: const Icon(Icons.add, size: 18),
+              icon: Icon(PhosphorIcons.plus(), size: 18),
               label: Text('Add Option', style: GoogleFonts.poppins(fontSize: 13)),
             ),
         ],

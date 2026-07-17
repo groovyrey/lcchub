@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class AssistantScreen extends StatefulWidget {
   final List<ChatMessage> messages;
   final bool isGenerating;
@@ -62,13 +63,13 @@ class _AssistantScreenState extends State<AssistantScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                const Icon(Icons.smart_toy_outlined, size: 16, color: AppColors.onSurfaceVariant),
+                Icon(PhosphorIcons.robot(), size: 16, color: AppColors.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text('LCC Assistant', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
                 const Spacer(),
                 TextButton.icon(
                   onPressed: widget.onClearChat,
-                  icon: const Icon(Icons.delete_outline, size: 16),
+                  icon: Icon(PhosphorIcons.trash(), size: 16),
                   label: Text('Clear', style: GoogleFonts.poppins(fontSize: 12)),
                 ),
               ],
@@ -90,7 +91,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
             color: AppColors.error.withValues(alpha: 0.1),
             child: Row(
               children: [
-                const Icon(Icons.error_outline, size: 16, color: AppColors.error),
+                Icon(PhosphorIcons.warningCircle(), size: 16, color: AppColors.error),
                 const SizedBox(width: 8),
                 Expanded(child: Text(widget.error!, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.error))),
               ],
@@ -123,12 +124,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
                 if (widget.isGenerating)
                   IconButton(
                     onPressed: widget.onStop,
-                    icon: const Icon(Icons.stop_circle, color: AppColors.error),
+                    icon: Icon(PhosphorIcons.stopCircle(), color: AppColors.error),
                   )
                 else
                   IconButton(
                     onPressed: _send,
-                    icon: const Icon(Icons.send, color: AppColors.primary),
+                    icon: Icon(PhosphorIcons.paperPlaneRight(), color: AppColors.primary),
                   ),
               ],
             ),
@@ -148,10 +149,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
             Container(
               width: 80, height: 80,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+                gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.smart_toy_outlined, size: 40, color: Colors.white),
+              child: Icon(PhosphorIcons.robot(), size: 40, color: Colors.white),
             ),
             const SizedBox(height: 20),
             Text('LCC Assistant', style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),

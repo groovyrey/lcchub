@@ -4,6 +4,7 @@ import '../../api/portal_api.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class ProfileScreen extends StatefulWidget {
   final String userId;
   const ProfileScreen({super.key, required this.userId});
@@ -47,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? Center(child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+                Icon(PhosphorIcons.warningCircle(), size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
                 const SizedBox(height: 12),
                 Text(_error!, style: GoogleFonts.poppins(color: AppColors.onSurfaceVariant)),
                 const SizedBox(height: 16),
@@ -121,10 +122,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _infoChip(Icons.school_outlined, course),
+                _infoChip(PhosphorIcons.graduationCap(), course),
                 if (yearLevel != null) ...[
                   const SizedBox(width: 8),
-                  _infoChip(Icons.calendar_today_outlined, yearLevel),
+                  _infoChip(PhosphorIcons.calendar(), yearLevel),
                 ],
               ],
             ),
@@ -140,9 +141,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _statColumn(Icons.article_outlined, '${_posts.length}', 'Posts'),
+                _statColumn(PhosphorIcons.article(), '${_posts.length}', 'Posts'),
                 Container(width: 1, height: 32, color: AppColors.outline.withValues(alpha: 0.3)),
-                _statColumn(Icons.emoji_events_outlined, '${badges.length}', 'Badges'),
+                _statColumn(PhosphorIcons.trophy(), '${badges.length}', 'Badges'),
               ],
             ),
           ),
@@ -181,11 +182,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  static const _badgeMeta = {
-    'staff': {'label': 'Staff', 'icon': Icons.shield_outlined, 'color': Colors.blue},
-    'community_active': {'label': 'Community Active', 'icon': Icons.forum_outlined, 'color': Colors.blueGrey},
-    'beta_tester': {'label': 'Beta Tester', 'icon': Icons.science_outlined, 'color': Colors.amber},
-    'perfect_grade': {'label': 'Perfect Grade', 'icon': Icons.emoji_events_outlined, 'color': Colors.amber},
+  static final _badgeMeta = {
+    'staff': {'label': 'Staff', 'icon': PhosphorIcons.shield(), 'color': Colors.blue},
+    'community_active': {'label': 'Community Active', 'icon': PhosphorIcons.chats(), 'color': Colors.blueGrey},
+    'beta_tester': {'label': 'Beta Tester', 'icon': PhosphorIcons.flask(), 'color': Colors.amber},
+    'perfect_grade': {'label': 'Perfect Grade', 'icon': PhosphorIcons.trophy(), 'color': Colors.amber},
   };
 
   Widget _buildBadgesSection() {
@@ -206,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: badges.map((b) {
                 final meta = _badgeMeta[b];
                 final label = meta?['label'] as String? ?? b;
-                final icon = meta?['icon'] as IconData? ?? Icons.star_outline;
+                final icon = meta?['icon'] as IconData? ?? PhosphorIcons.star();
                 final color = (meta?['color'] as Color?) ?? AppColors.primary;
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -260,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.forum_outlined, size: 36, color: AppColors.outline.withValues(alpha: 0.4)),
+                    Icon(PhosphorIcons.chats(), size: 36, color: AppColors.outline.withValues(alpha: 0.4)),
                     const SizedBox(height: 8),
                     Text('No posts yet', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
                   ],
@@ -308,11 +309,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.favorite_border, size: 14, color: AppColors.onSurfaceVariant),
+                Icon(PhosphorIcons.heart(), size: 14, color: AppColors.onSurfaceVariant),
                 const SizedBox(width: 3),
                 Text('${post.likes?.length ?? 0}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
                 const SizedBox(width: 12),
-                Icon(Icons.comment_outlined, size: 14, color: AppColors.onSurfaceVariant),
+                Icon(PhosphorIcons.chatCircle(), size: 14, color: AppColors.onSurfaceVariant),
                 const SizedBox(width: 3),
                 Text('${post.commentCount}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
               ],

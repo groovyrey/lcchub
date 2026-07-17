@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class CommunityScreen extends StatefulWidget {
   final List<CommunityPost> posts;
   final bool hasMore;
@@ -21,6 +22,7 @@ class CommunityScreen extends StatefulWidget {
   final Function(String) onAuthorTap;
   final VoidCallback onCreatePost;
   final VoidCallback onLoadMore;
+  final VoidCallback onRefresh;
 
   const CommunityScreen({
     super.key,
@@ -41,6 +43,7 @@ class CommunityScreen extends StatefulWidget {
     required this.onAuthorTap,
     required this.onCreatePost,
     required this.onLoadMore,
+    required this.onRefresh,
   });
 
   @override
@@ -69,10 +72,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search posts...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: Icon(PhosphorIcons.magnifyingGlass(), size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
+                        icon: Icon(PhosphorIcons.x(), size: 18),
                         onPressed: () {
                           _searchController.clear();
                           widget.onSearchChanged('');
@@ -111,12 +114,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: widget.posts.isEmpty && !widget.isLoading
+            child: RefreshIndicator(
+              onRefresh: () async => widget.onRefresh(),
+              child: widget.posts.isEmpty && !widget.isLoading
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.forum_outlined, size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+                        Icon(PhosphorIcons.chats(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
                         const SizedBox(height: 16),
                         Text('No posts found', style: GoogleFonts.poppins(fontSize: 16, color: AppColors.onSurfaceVariant)),
                       ],
@@ -136,13 +141,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       return _postCard(widget.posts[index]);
                     },
                   ),
-          ),
+            ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: widget.onCreatePost,
         backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(PhosphorIcons.plus(), color: Colors.white),
       ),
     );
   }
@@ -210,14 +216,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     onTap: () => widget.onLikePost(post.id),
                     child: Row(
                       children: [
-                        Icon(isLiked ? Icons.favorite : Icons.favorite_border, size: 16, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant),
+                        Icon(isLiked ? PhosphorIcons.heart(PhosphorIconsStyle.fill) : PhosphorIcons.heart(), size: 16, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Text('${post.likes?.length ?? 0}', style: GoogleFonts.poppins(fontSize: 12, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant)),
                       ],
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.comment_outlined, size: 16, color: AppColors.onSurfaceVariant),
+                  Icon(PhosphorIcons.chatCircle(), size: 16, color: AppColors.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Text('${post.commentCount}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
                 ],
@@ -353,7 +359,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               decoration: BoxDecoration(color: AppColors.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
             ),
             if (isOwner) ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              leading: Icon(PhosphorIcons.trash(), color: AppColors.error),
               title: Text('Delete Post', style: GoogleFonts.poppins(color: AppColors.error)),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -374,7 +380,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag_outlined, color: AppColors.onSurfaceVariant),
+              leading: Icon(PhosphorIcons.flag(), color: AppColors.onSurfaceVariant),
               title: Text('Report Post', style: GoogleFonts.poppins()),
               onTap: () async {
                 Navigator.pop(ctx);

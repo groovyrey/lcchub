@@ -3,10 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class SettingsScreen extends StatefulWidget {
   final Student? student;
   final bool notificationsEnabled;
   final Function(bool) onNotificationToggle;
+  final ThemeMode themeMode;
+  final Function(ThemeMode) onThemeModeChanged;
   final VoidCallback onLogout;
 
   const SettingsScreen({
@@ -14,6 +17,8 @@ class SettingsScreen extends StatefulWidget {
     this.student,
     required this.notificationsEnabled,
     required this.onNotificationToggle,
+    required this.themeMode,
+    required this.onThemeModeChanged,
     required this.onLogout,
   });
 
@@ -50,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+              gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
@@ -84,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               _settingItem(
-                icon: Icons.notifications_outlined,
+                icon: PhosphorIcons.bell(),
                 title: 'Notifications',
                 subtitle: 'Enable daily schedule reminders',
                 trailing: Switch(
@@ -97,8 +102,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
+              _themeSetting(),
+              const Divider(height: 1, indent: 16, endIndent: 16),
               _settingItem(
-                icon: Icons.public,
+                icon: PhosphorIcons.globeHemisphereWest(),
                 title: 'Public Profile',
                 subtitle: 'Allow others to see your profile',
                 trailing: Switch(
@@ -109,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
               _settingItem(
-                icon: Icons.school_outlined,
+                icon: PhosphorIcons.graduationCap(),
                 title: 'Show Academic Info',
                 subtitle: 'Display course and year level',
                 trailing: Switch(
@@ -129,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: Container(
               width: 40, height: 40,
               decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: const Icon(Icons.logout, color: AppColors.error, size: 20),
+              child: Icon(PhosphorIcons.signOut(), color: AppColors.error, size: 20),
             ),
             title: Text('Sign Out', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error)),
             subtitle: Text('Log out of your account', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
@@ -138,6 +145,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  Widget _themeSetting() {
+    final current = widget.themeMode;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(color: AppColors.surfaceVariant, shape: BoxShape.circle),
+            child: Icon(
+              current == ThemeMode.dark ? PhosphorIcons.moon() : current == ThemeMode.light ? PhosphorIcons.sun() : PhosphorIcons.deviceMobile(),
+              size: 20, color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Appearance', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500)),
+                Text(_themeModeLabel(current), style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+              ],
+            ),
+          ),
+          SegmentedButton<ThemeMode>(
+            segments: [
+              ButtonSegment(value: ThemeMode.light, icon: Icon(PhosphorIcons.sun(), size: 18)),
+              ButtonSegment(value: ThemeMode.system, icon: Icon(PhosphorIcons.deviceMobile(), size: 18)),
+              ButtonSegment(value: ThemeMode.dark, icon: Icon(PhosphorIcons.moon(), size: 18)),
+          ],
+            selected: {current},
+            onSelectionChanged: (s) => widget.onThemeModeChanged(s.first),
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppColors.primary.withValues(alpha: 0.15);
+                }
+                return Colors.transparent;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppColors.primary;
+                }
+                return AppColors.onSurfaceVariant;
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _themeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light: return 'Light';
+      case ThemeMode.dark:  return 'Dark';
+      case ThemeMode.system: return 'Follow system';
+    }
   }
 
   Widget _settingItem({required IconData icon, required String title, required String subtitle, required Widget trailing}) {

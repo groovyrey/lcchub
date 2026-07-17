@@ -9,6 +9,7 @@ class SessionStorage {
   static const _keyStudentId = 'student_id';
   static const _keyRemindersEnabled = 'reminders_enabled';
   static const _keyCookies = 'session_cookies';
+  static const _keyThemeMode = 'theme_mode';
 
   static const defaultBaseUrl = 'https://www.lccianhub.me';
 
@@ -92,6 +93,9 @@ class SessionStorage {
       _prefs.setString(_keyCookies, jsonEncode(value));
     }
   }
+
+  String get themeMode => _prefs.getString(_keyThemeMode) ?? 'system';
+  set themeMode(String value) => _prefs.setString(_keyThemeMode, value);
 
   Future<void> clear() async {
     await _prefs.clear();

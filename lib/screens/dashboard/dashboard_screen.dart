@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class DashboardScreen extends StatelessWidget {
   final Student? student;
   final VoidCallback onRefresh;
@@ -75,17 +76,17 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _infoTile(Icons.calendar_today, 'School Year', s.schoolYear ?? 'N/A')),
+              Expanded(child: _infoTile(PhosphorIcons.calendar(PhosphorIconsStyle.fill), 'School Year', s.schoolYear ?? 'N/A')),
               const SizedBox(width: 12),
-              Expanded(child: _infoTile(Icons.school, 'Year Level', s.yearLevel ?? 'N/A')),
+              Expanded(child: _infoTile(PhosphorIcons.graduationCap(PhosphorIconsStyle.fill), 'Year Level', s.yearLevel ?? 'N/A')),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _infoTile(Icons.event, 'Semester', s.semester ?? 'N/A')),
+              Expanded(child: _infoTile(PhosphorIcons.calendarBlank(), 'Semester', s.semester ?? 'N/A')),
               const SizedBox(width: 12),
-              Expanded(child: _infoTile(Icons.group, 'Section', s.section ?? 'N/A')),
+              Expanded(child: _infoTile(PhosphorIcons.users(), 'Section', s.section ?? 'N/A')),
             ],
           ),
           if (s.schedule != null && s.schedule!.isNotEmpty) ...[
@@ -113,7 +114,7 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy, size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+            Icon(PhosphorIcons.calendarX(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text('No schedule available', style: GoogleFonts.poppins(fontSize: 16, color: AppColors.onSurfaceVariant)),
           ],
@@ -132,7 +133,7 @@ class DashboardScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+        gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
       ),
@@ -226,12 +227,12 @@ class DashboardScreen extends StatelessWidget {
               spacing: 12,
               runSpacing: 6,
               children: [
-                _detailChip(Icons.access_time, item.time.isNotEmpty ? item.time : 'TBA'),
-                _detailChip(Icons.room, item.room.isNotEmpty ? item.room : 'TBA'),
+                _detailChip(PhosphorIcons.clock(), item.time.isNotEmpty ? item.time : 'TBA'),
+                _detailChip(PhosphorIcons.mapPin(), item.room.isNotEmpty ? item.room : 'TBA'),
                 if (item.instructor != null && item.instructor!.isNotEmpty)
-                  _detailChip(Icons.person, item.instructor!),
+                  _detailChip(PhosphorIcons.user(PhosphorIconsStyle.fill), item.instructor!),
                 if (item.section.isNotEmpty)
-                  _detailChip(Icons.group, item.section),
+                  _detailChip(PhosphorIcons.users(), item.section),
               ],
             ),
           ],

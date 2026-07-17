@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 class PostDetailScreen extends StatefulWidget {
   final CommunityPost? post;
   final List<CommunityComment> comments;
@@ -81,14 +82,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         onTap: () => widget.onLikePost(post.id),
                         child: Row(
                           children: [
-                            Icon(isLiked ? Icons.favorite : Icons.favorite_border, size: 18, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant),
+                            Icon(isLiked ? PhosphorIcons.heart(PhosphorIconsStyle.fill) : PhosphorIcons.heart(), size: 18, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant),
                             const SizedBox(width: 4),
                             Text('${post.likes?.length ?? 0}', style: GoogleFonts.poppins(fontSize: 13, color: isLiked ? AppColors.error : AppColors.onSurfaceVariant)),
                           ],
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Icon(Icons.comment_outlined, size: 18, color: AppColors.onSurfaceVariant),
+                      Icon(PhosphorIcons.chatCircle(), size: 18, color: AppColors.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Text('${widget.comments.length} comments', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
                     ],
@@ -133,7 +134,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         _commentController.clear();
                       }
                     },
-                    icon: const Icon(Icons.send, color: AppColors.primary),
+                    icon: Icon(PhosphorIcons.paperPlaneRight(), color: AppColors.primary),
                   ),
                 ],
               ),
@@ -418,7 +419,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               decoration: BoxDecoration(color: AppColors.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
             ),
             if (isOwner) ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              leading: Icon(PhosphorIcons.trash(), color: AppColors.error),
               title: Text('Delete Post', style: GoogleFonts.poppins(color: AppColors.error)),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -440,7 +441,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag_outlined, color: AppColors.onSurfaceVariant),
+              leading: Icon(PhosphorIcons.flag(), color: AppColors.onSurfaceVariant),
               title: Text('Report Post', style: GoogleFonts.poppins()),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -487,7 +488,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               decoration: BoxDecoration(color: AppColors.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
             ),
             if (isOwner) ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              leading: Icon(PhosphorIcons.trash(), color: AppColors.error),
               title: Text('Delete Comment', style: GoogleFonts.poppins(color: AppColors.error)),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -509,7 +510,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag_outlined, color: AppColors.onSurfaceVariant),
+              leading: Icon(PhosphorIcons.flag(), color: AppColors.onSurfaceVariant),
               title: Text('Report Comment', style: GoogleFonts.poppins()),
               onTap: () async {
                 Navigator.pop(ctx);
