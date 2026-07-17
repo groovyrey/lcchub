@@ -37,6 +37,17 @@ class Student {
     this.settings,
   });
 
+  Student copyWith({StudentSettings? settings}) {
+    return Student(
+      name: name, id: id, course: course, email: email,
+      address: address, mobile: mobile, enrollmentDate: enrollmentDate,
+      schoolYear: schoolYear, yearLevel: yearLevel, semester: semester,
+      section: section, schedule: schedule, financials: financials,
+      grades: grades, availableReports: availableReports, badges: badges,
+      settings: settings ?? this.settings,
+    );
+  }
+
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
       name: json['name'] ?? '',
@@ -264,16 +275,34 @@ class StudentSettings {
   final bool notifications;
   final bool isPublic;
   final bool showAcademicInfo;
+  final bool classReminders;
+  final bool paymentReminders;
 
-  StudentSettings({this.notifications = true, this.isPublic = true, this.showAcademicInfo = true});
+  StudentSettings({
+    this.notifications = true,
+    this.isPublic = true,
+    this.showAcademicInfo = true,
+    this.classReminders = true,
+    this.paymentReminders = true,
+  });
 
   factory StudentSettings.fromJson(Map<String, dynamic> json) {
     return StudentSettings(
       notifications: json['notifications'] ?? true,
       isPublic: json['isPublic'] ?? true,
       showAcademicInfo: json['showAcademicInfo'] ?? true,
+      classReminders: json['classReminders'] ?? true,
+      paymentReminders: json['paymentReminders'] ?? true,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'notifications': notifications,
+    'isPublic': isPublic,
+    'showAcademicInfo': showAcademicInfo,
+    'classReminders': classReminders,
+    'paymentReminders': paymentReminders,
+  };
 }
 
 class CommunityPost {

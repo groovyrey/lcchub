@@ -9,6 +9,7 @@ class SettingsScreen extends StatefulWidget {
   final Function(bool) onNotificationToggle;
   final ThemeMode themeMode;
   final Function(ThemeMode) onThemeModeChanged;
+  final Function(String, bool) onUpdateSetting;
   final VoidCallback onLogout;
 
   const SettingsScreen({
@@ -18,6 +19,7 @@ class SettingsScreen extends StatefulWidget {
     required this.onNotificationToggle,
     required this.themeMode,
     required this.onThemeModeChanged,
+    required this.onUpdateSetting,
     required this.onLogout,
   });
 
@@ -27,8 +29,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late bool _notifEnabled;
-  bool _publicProfile = true;
-  bool _showAcademic = true;
 
   @override
   void initState() {
@@ -108,8 +108,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: 'Public Profile',
                 subtitle: 'Allow others to see your profile',
                 trailing: Switch(
-                  value: _publicProfile,
-                  onChanged: (v) => setState(() => _publicProfile = v),
+                  value: widget.student?.settings?.isPublic ?? true,
+                  onChanged: (v) => widget.onUpdateSetting('isPublic', v),
                   activeColor: AppColors.primary,
                 ),
               ),
@@ -119,8 +119,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: 'Show Academic Info',
                 subtitle: 'Display course and year level',
                 trailing: Switch(
-                  value: _showAcademic,
-                  onChanged: (v) => setState(() => _showAcademic = v),
+                  value: widget.student?.settings?.showAcademicInfo ?? true,
+                  onChanged: (v) => widget.onUpdateSetting('showAcademicInfo', v),
+                  activeColor: AppColors.primary,
+                ),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              _settingItem(
+                icon: PhosphorIcons.calendarBlank(),
+                title: 'Class Reminders',
+                subtitle: 'Get notified about today\'s classes',
+                trailing: Switch(
+                  value: widget.student?.settings?.classReminders ?? true,
+                  onChanged: (v) => widget.onUpdateSetting('classReminders', v),
+                  activeColor: AppColors.primary,
+                ),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              _settingItem(
+                icon: PhosphorIcons.wallet(),
+                title: 'Payment Alerts',
+                subtitle: 'Get reminded about upcoming payments',
+                trailing: Switch(
+                  value: widget.student?.settings?.paymentReminders ?? true,
+                  onChanged: (v) => widget.onUpdateSetting('paymentReminders', v),
                   activeColor: AppColors.primary,
                 ),
               ),

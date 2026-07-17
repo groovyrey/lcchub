@@ -530,6 +530,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         onNotificationToggle: (v) => state.toggleReminders(v),
         themeMode: state.themeMode,
         onThemeModeChanged: (mode) => state.setThemeMode(mode),
+        onUpdateSetting: (key, value) => state.updateSetting(key, value),
         onLogout: () => state.logout(),
       ),
       'about' => const AboutScreen(),
@@ -656,6 +657,9 @@ class AppState extends ChangeNotifier {
     _isLoggedIn = _storage.isLoggedIn;
     _student = _storage.studentData;
     _remindersEnabled = _storage.remindersEnabled;
+    if (_student?.settings?.notifications != null) {
+      _remindersEnabled = _student!.settings!.notifications;
+    }
     _themeMode = _parseThemeMode(_storage.themeMode);
     PortalApi.init(_storage.baseUrl, _storage);
     _initConnectivity();
@@ -722,6 +726,9 @@ class AppState extends ChangeNotifier {
       _storage.isLoggedIn = true;
       _storage.studentId = userId;
       _storage.studentData = _student;
+      if (_student?.settings?.notifications != null) {
+        _remindersEnabled = _student!.settings!.notifications;
+      }
       NotificationService.requestPermission().then((_) => _scheduleRemindersIfNeeded());
       _loadCommunity();
       _startDataRefreshTimer();
@@ -1133,12 +1140,36 @@ class AppState extends ChangeNotifier {
   void toggleReminders(bool enabled) {
     _remindersEnabled = enabled;
     _storage.remindersEnabled = enabled;
+    final updated = Map<String, dynamic>.from(_student?.settings?.toJson() ?? {});
+    updated['notifications'] = enabled;
+    _updateSettings(updated);
     if (enabled) {
       _scheduleRemindersIfNeeded();
     } else {
       NotificationService.cancelAll();
     }
     notifyListeners();
+  }
+
+  Future<void> updateSetting(String key, bool value) async {
+    final updated = Map<String, dynamic>.from(_student?.settings?.toJson() ?? {});
+    updated[key] = value;
+    if (_student?.settings != null) {
+      final old = _student!.settings!;
+      _student = _student!.copyWith(settings: StudentSettings(
+        notifications: key == 'notifications' ? value : old.notifications,
+        isPublic: key == 'isPublic' ? value : old.isPublic,
+        showAcademicInfo: key == 'showAcademicInfo' ? value : old.showAcademicInfo,
+        classReminders: key == 'classReminders' ? value : old.classReminders,
+        paymentReminders: key == 'paymentReminders' ? value : old.paymentReminders,
+      ));
+    }
+    notifyListeners();
+    await _updateSettings(updated);
+  }
+
+  Future<void> _updateSettings(Map<String, dynamic> settings) async {
+    await PortalApi.updateSettings(settings);
   }
 
   void setThemeMode(ThemeMode mode) {

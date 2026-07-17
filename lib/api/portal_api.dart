@@ -456,6 +456,21 @@ class PortalApi {
     }
   }
 
+  static Future<bool> updateSettings(Map<String, dynamic> settings) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/student/settings'),
+        headers: _headers(),
+        body: jsonEncode({'settings': settings}),
+      );
+      _updateCookies(response);
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Stream<String> chatStream(List<Map<String, String>> messages) async* {
     final request = http.Request('POST', Uri.parse('$_baseUrl/api/ai/assistant'));
     request.headers.addAll(_headers());
