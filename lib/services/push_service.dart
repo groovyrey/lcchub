@@ -15,39 +15,33 @@ class PushService {
   static FirebaseMessaging? _messaging;
   static bool _initialized = false;
   static String? _deviceToken;
+  static AuthorizationStatus _authStatus = AuthorizationStatus.notDetermined;
 
   static bool get isAvailable => _initialized;
+  static String? get deviceToken => _deviceToken;
+  static bool get permissionGranted =>
+      _authStatus == AuthorizationStatus.authorized ||
+      _authStatus == AuthorizationStatus.provisional;
+  static AuthorizationStatus get authorizationStatus => _authStatus;
 
   static Future<void> init() async {
     try {
       await Firebase.initializeApp();
       _messaging = FirebaseMessaging.instance;
       _initialized = true;
-      debugPrint('[Push] Firebase initialized');
 
-      // Request permission
       final settings = await _messaging!.requestPermission(
         alert: true,
         badge: true,
         sound: true,
         provisional: false,
       );
-      debugPrint('[Push] Permission status: ${settings.authorizationStatus}');
+      _authStatus = settings.authorizationStatus;
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
-        _deviceToken = await _messaging!.getToken();
-        debugPrint('[Push] Device token: $_deviceToken');
-      } else {
-        debugPrint('[Push] Permission denied');
-      }
-
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
+      if (permissionGranted) {
         _deviceToken = await _messaging!.getToken();
       }
 
-      // Local notif setup
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
@@ -58,20 +52,20 @@ class PushService {
         const InitializationSettings(android: androidSettings, iOS: iosSettings),
       );
 
-      // Foreground messages
       FirebaseMessaging.onMessage.listen(_handleMessage);
-
-      // Background tap
       FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-
-      // Background handler registration
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     } catch (_) {
       _initialized = false;
     }
   }
 
-  static String? get deviceToken => _deviceToken;
+  static Future<void> refreshToken() async {
+    if (!_initialized || _messaging == null) return;
+    try {
+      _deviceToken = await _messaging!.getToken();
+    } catch (_) {}
+  }
 
   static void _handleMessage(RemoteMessage message) {
     final notification = message.notification;

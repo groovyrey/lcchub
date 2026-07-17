@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
-
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../services/push_service.dart';
+import '../../api/portal_api.dart';
 class SettingsScreen extends StatefulWidget {
   final Student? student;
   final bool notificationsEnabled;
@@ -143,6 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => _showLogoutDialog(context),
           ),
         ),
+        const SizedBox(height: 16),
+        _pushDebugSection(),
       ],
     );
   }
@@ -253,6 +257,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _pushDebugSection() {
+    final available = PushService.isAvailable;
+    final granted = PushService.permissionGranted;
+    final token = PushService.deviceToken;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Push Notifications', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _debugRow('Firebase', available ? 'Ready' : 'Not initialized'),
+                const SizedBox(height: 6),
+                _debugRow('Permission', granted ? 'Granted' : PushService.authorizationStatus == AuthorizationStatus.denied ? 'Denied' : 'Not requested'),
+                const SizedBox(height: 6),
+                _debugRow('Token', token != null && token.isNotEmpty ? token : '—'),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await PushService.refreshToken();
+                      final t = PushService.deviceToken;
+                      if (t != null && t.isNotEmpty) {
+                        await PortalApi.registerDeviceToken(t);
+                      }
+                      setState(() {});
+                    },
+                    icon: Icon(PhosphorIcons.arrowClockwise(), size: 16),
+                    label: Text('Register / Refresh Token', style: GoogleFonts.poppins(fontSize: 13)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _debugRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(label, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+        ),
+        Expanded(
+          child: Text(value, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurface)),
+        ),
+      ],
     );
   }
 }
