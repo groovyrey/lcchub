@@ -67,6 +67,22 @@ class PushService {
     } catch (_) {}
   }
 
+  static Future<void> showTestNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'lcc_push',
+      'LCC Hub Notifications',
+      channelDescription: 'Grades, announcements, and payment alerts',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    await _localNotifs.show(
+      0,
+      'Test Notification',
+      'This is a test notification from LCC Hub',
+      const NotificationDetails(android: androidDetails),
+    );
+  }
+
   static void _handleMessage(RemoteMessage message) {
     final notification = message.notification;
     if (notification == null) return;

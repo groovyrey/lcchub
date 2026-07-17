@@ -1,27 +1,37 @@
 {
   "project_info": {
-    "project_number": "82189557976",
-    "firebase_url": "https://diy-ngl-default-rtdb.firebaseio.com",
-    "project_id": "diy-ngl",
-    "storage_bucket": "diy-ngl.firebasestorage.app"
+    "project_number": "92195805668",
+    "firebase_url": "https://lccportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "lccportal",
+    "storage_bucket": "lccportal.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82189557976:android:7b24acde745ff62ceeb7ad",
+        "mobilesdk_app_id": "1:92195805668:android:6b0652f415f48b59448ff1",
         "android_client_info": {
           "package_name": "com.lcc.portal_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "92195805668-mva4k81tobtm4ip3slieuvhjbamtm8rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyD9Kb33qGJDL2ZEax2N_VhMdkMZExVxSwA"
+          "current_key": "AIzaSyB21ILhtJpHM3j9-ijcugWUusEbBsTv6cE"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92195805668-9j43f3e3qh2ulornk5l0v9t2tjqg26hd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
