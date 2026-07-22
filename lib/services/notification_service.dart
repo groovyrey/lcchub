@@ -24,24 +24,25 @@ class NotificationService {
   static Future<void> scheduleDailyReminder(List<ScheduleItem> schedule) async {
     await _plugin.cancelAll();
 
-    final todayClasses = _getTodayClasses(schedule);
-    if (todayClasses.isEmpty) return;
-
-    final body = todayClasses.map((item) {
-      final time = item.time.isNotEmpty ? item.time : 'TBA';
-      final room = item.room.isNotEmpty ? ' @ ${item.room}' : '';
-      return '${item.subject}$room - $time';
-    }).join('\n');
-
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, 6, 0);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
+    final fireDate = DateTime(scheduled.year, scheduled.month, scheduled.day);
+    final fireDateClasses = getTodayClasses(schedule, referenceDate: fireDate);
+    if (fireDateClasses.isEmpty) return;
+
+    final body = fireDateClasses.map((item) {
+      final time = item.time.isNotEmpty ? item.time : 'TBA';
+      final room = item.room.isNotEmpty ? ' @ ${item.room}' : '';
+      return '${item.subject}$room - $time';
+    }).join('\n');
+
     await _plugin.zonedSchedule(
       1001,
-      "Today's Schedule",
+      "Tomorrow's Schedule",
       body,
       scheduled,
       const NotificationDetails(
@@ -54,7 +55,6 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
@@ -63,32 +63,41 @@ class NotificationService {
     await _plugin.cancelAll();
   }
 
-  static List<ScheduleItem> _getTodayClasses(List<ScheduleItem> schedule) {
-    final now = DateTime.now();
-    final dayOfWeek = now.weekday;
-    final todayAbbrev = switch (dayOfWeek) {
-      1 => 'm',
-      2 => 't',
-      3 => 'w',
-      4 => 'th',
-      5 => 'f',
-      6 => 'sa',
-      7 => 'su',
+  static List<String> _extractDayTokens(String time) {
+    return time
+        .toUpperCase()
+        .split(RegExp(r'[,/\s]+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+  }
+
+  static final _dayTokenMap = {
+    'MON': 'mon', 'MONDAY': 'mon',
+    'TUE': 'tue', 'TUES': 'tue', 'TUESDAY': 'tue',
+    'WED': 'wed', 'WEDNESDAY': 'wed',
+    'THU': 'thu', 'THUR': 'thu', 'THURS': 'thu', 'THURSDAY': 'thu',
+    'FRI': 'fri', 'FRIDAY': 'fri',
+    'SAT': 'sat', 'SATURDAY': 'sat',
+    'SUN': 'sun', 'SUNDAY': 'sun',
+  };
+
+  static List<ScheduleItem> getTodayClasses(List<ScheduleItem> schedule, {DateTime? referenceDate}) {
+    final date = referenceDate ?? DateTime.now();
+    final dayOfWeek = date.weekday;
+    final todayCode = switch (dayOfWeek) {
+      1 => 'mon',
+      2 => 'tue',
+      3 => 'wed',
+      4 => 'thu',
+      5 => 'fri',
+      6 => 'sat',
+      7 => 'sun',
       _ => '',
     };
 
     return schedule.where((item) {
-      final timeLower = item.time.toLowerCase();
-      return switch (todayAbbrev) {
-        'm' => timeLower.contains('m') && !timeLower.contains('w') && !timeLower.contains('f'),
-        't' => timeLower.contains('t') && !timeLower.contains('th'),
-        'w' => timeLower.contains('w'),
-        'th' => timeLower.contains('th') || (timeLower.contains('t') && !timeLower.contains('tu')),
-        'f' => timeLower.contains('f'),
-        'sa' => timeLower.contains('sa') || timeLower.contains('sat'),
-        'su' => timeLower.contains('su') || timeLower.contains('sun'),
-        _ => false,
-      };
+      final tokens = _extractDayTokens(item.time);
+      return tokens.any((token) => _dayTokenMap[token] == todayCode);
     }).toList();
   }
 }

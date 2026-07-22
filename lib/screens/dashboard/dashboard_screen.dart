@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
+import '../../services/notification_service.dart';
 import '../../theme/app_theme.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -93,7 +94,7 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Today\'s Classes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
             const SizedBox(height: 8),
-            ...s.schedule!.take(5).map((item) => _scheduleTile(item)),
+            ...NotificationService.getTodayClasses(s.schedule!).map((item) => _scheduleTile(item)),
           ],
           if (s.financials != null) ...[
             const SizedBox(height: 16),
