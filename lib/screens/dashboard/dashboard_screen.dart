@@ -94,7 +94,18 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Today\'s Classes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
             const SizedBox(height: 8),
-            ...NotificationService.getTodayClasses(s.schedule!).map((item) => _scheduleTile(item)),
+            ...NotificationService.getTodayClasses(s.schedule!).isEmpty
+                ? [Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+                    ),
+                    child: Text('No classes today', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
+                  )]
+                : NotificationService.getTodayClasses(s.schedule!).map((item) => _scheduleTile(item)),
           ],
           if (s.financials != null) ...[
             const SizedBox(height: 16),
@@ -122,10 +133,38 @@ class DashboardScreen extends StatelessWidget {
         ),
       );
     }
-    return ListView.builder(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      itemCount: schedule.length,
-      itemBuilder: (context, index) => _scheduleDetailTile(schedule[index]),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 16,
+            headingRowColor: WidgetStateProperty.all(AppColors.primary.withValues(alpha: 0.1)),
+            columns: const [
+              DataColumn(label: Text('Subject', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+              DataColumn(label: Text('Time', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+              DataColumn(label: Text('Room', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+              DataColumn(label: Text('Section', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+              DataColumn(label: Text('Units', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+              DataColumn(label: Text('Instructor', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
+            ],
+            rows: schedule.map((item) => DataRow(cells: [
+              DataCell(Text(item.subject, style: const TextStyle(fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis)),
+              DataCell(Text(item.time.isNotEmpty ? item.time : 'TBA', style: const TextStyle(fontSize: 12))),
+              DataCell(Text(item.room.isNotEmpty ? item.room : 'TBA', style: const TextStyle(fontSize: 12))),
+              DataCell(Text(item.section.isNotEmpty ? item.section : '—', style: const TextStyle(fontSize: 12))),
+              DataCell(Text(item.units.isNotEmpty ? item.units : '—', style: const TextStyle(fontSize: 12))),
+              DataCell(Text(item.instructor?.isNotEmpty == true ? item.instructor! : '—', style: const TextStyle(fontSize: 12))),
+            ])).toList(),
+          ),
+        ),
+      ),
     );
   }
 
