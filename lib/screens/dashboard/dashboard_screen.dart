@@ -237,61 +237,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _scheduleDetailTile(ScheduleItem item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(item.subject, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
-                ),
-                if (item.units.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                    child: Text('${item.units} units', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.w500)),
-                  ),
-              ],
-            ),
-            if (item.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(item.description, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
-            ],
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 12,
-              runSpacing: 6,
-              children: [
-                _detailChip(PhosphorIcons.clock(), item.time.isNotEmpty ? item.time : 'TBA'),
-                _detailChip(PhosphorIcons.mapPin(), item.room.isNotEmpty ? item.room : 'TBA'),
-                if (item.instructor != null && item.instructor!.isNotEmpty)
-                  _detailChip(PhosphorIcons.user(PhosphorIconsStyle.fill), item.instructor!),
-                if (item.section.isNotEmpty)
-                  _detailChip(PhosphorIcons.users(), item.section),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _detailChip(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: AppColors.onSurfaceVariant),
-        const SizedBox(width: 4),
-        Text(text, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
-      ],
-    );
-  }
-
   Widget _financialTile(String label, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

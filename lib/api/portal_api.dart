@@ -481,7 +481,6 @@ class PortalApi {
     _updateCookies(http.Response('', streamedResponse.statusCode, headers: streamedResponse.headers));
 
     final buffer = StringBuffer();
-    var inThoughtBlock = false;
     var yieldedLen = 0;
 
     await for (final chunk in streamedResponse.stream.transform(utf8.decoder)) {
@@ -505,11 +504,8 @@ class PortalApi {
         final lastClose = text.lastIndexOf('</thought>');
 
         if (lastOpen > lastClose) {
-          inThoughtBlock = true;
           continue;
         }
-
-        inThoughtBlock = false;
         final cleaned = text.replaceAll(
           RegExp(r'<thought>[\s\S]*?</thought>', dotAll: true), '');
 

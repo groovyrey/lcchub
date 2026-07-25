@@ -358,7 +358,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             );
           }),
-          Text('${totalVotes} vote${totalVotes == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+          Text('$totalVotes vote${totalVotes == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
         ],
       ),
     );

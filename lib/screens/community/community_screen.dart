@@ -313,7 +313,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 ),
               );
             }),
-            Text('${totalVotes} vote${totalVotes == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
+            Text('$totalVotes vote${totalVotes == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
           ],
         ),
       ),

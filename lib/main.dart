@@ -303,7 +303,7 @@ class _AppShellState extends State<AppShell> {
               final uri = Uri.parse(info.downloadUrl);
               if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
               if (ctx.mounted) {
-                context.read<AppState>().dismissUpdate();
+                ctx.read<AppState>().dismissUpdate();
                 Navigator.pop(ctx);
               }
             },
