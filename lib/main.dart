@@ -27,10 +27,10 @@ import 'screens/profile/profile_screen.dart';
 import 'widgets/notification_drawer.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService.init();
-  PushService.init();
+  await NotificationService.init();
+  await PushService.init();
   runApp(const PortalApp());
 }
 
@@ -587,6 +587,7 @@ class AppState extends ChangeNotifier {
   bool _isLoggedIn = false;
   Student? _student;
   bool _remindersEnabled = true;
+  bool _remindersScheduled = false;
 
   List<ReportLink> _reports = [];
   Map<String, List<SubjectGrade>> _loadedGrades = {};
@@ -749,6 +750,7 @@ class AppState extends ChangeNotifier {
     _communityPosts = [];
     _chatMessages = [];
     _notifications = [];
+    _remindersScheduled = false;
     _communityPollTimer?.cancel();
     _communityPollTimer = null;
     _notifPollTimer?.cancel();
@@ -1187,7 +1189,9 @@ class AppState extends ChangeNotifier {
   }
 
   void _scheduleRemindersIfNeeded() {
+    if (_remindersScheduled) return;
     if (_remindersEnabled && _student?.schedule != null && _student!.schedule!.isNotEmpty) {
+      _remindersScheduled = true;
       NotificationService.scheduleDailyReminder(_student!.schedule!);
     }
   }

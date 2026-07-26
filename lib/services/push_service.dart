@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'notification_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -10,7 +11,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class PushService {
-  static final FlutterLocalNotificationsPlugin _localNotifs = FlutterLocalNotificationsPlugin();
   static FirebaseMessaging? _messaging;
   static bool _initialized = false;
   static String? _deviceToken;
@@ -47,7 +47,7 @@ class PushService {
         requestBadgePermission: true,
         requestSoundPermission: true,
       );
-      await _localNotifs.initialize(
+      await NotificationService.plugin.initialize(
         const InitializationSettings(android: androidSettings, iOS: iosSettings),
       );
 
@@ -74,7 +74,7 @@ class PushService {
       importance: Importance.high,
       priority: Priority.high,
     );
-    await _localNotifs.show(
+    await NotificationService.plugin.show(
       0,
       'Test Notification',
       'This is a test notification from LCC Hub',
@@ -94,7 +94,7 @@ class PushService {
       priority: Priority.high,
     );
 
-    _localNotifs.show(
+    NotificationService.plugin.show(
       message.messageId.hashCode,
       notification.title,
       notification.body,

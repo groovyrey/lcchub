@@ -7,6 +7,8 @@ import '../models/models.dart';
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
 
+  static FlutterLocalNotificationsPlugin get plugin => _plugin;
+
   static Future<void> init() async {
     tz.initializeTimeZones();
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
