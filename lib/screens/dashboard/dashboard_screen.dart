@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../services/notification_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/schedule_table.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 class DashboardScreen extends StatelessWidget {
@@ -133,39 +134,7 @@ class DashboardScreen extends StatelessWidget {
         ),
       );
     }
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columnSpacing: 16,
-            headingRowColor: WidgetStateProperty.all(AppColors.primary.withValues(alpha: 0.1)),
-            columns: const [
-              DataColumn(label: Text('Subject', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              DataColumn(label: Text('Time', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              DataColumn(label: Text('Room', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              DataColumn(label: Text('Section', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              DataColumn(label: Text('Units', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-              DataColumn(label: Text('Instructor', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-            ],
-            rows: schedule.map((item) => DataRow(cells: [
-              DataCell(Text(item.subject, style: const TextStyle(fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis)),
-              DataCell(Text(item.time.isNotEmpty ? item.time : 'TBA', style: const TextStyle(fontSize: 12))),
-              DataCell(Text(item.room.isNotEmpty ? item.room : 'TBA', style: const TextStyle(fontSize: 12))),
-              DataCell(Text(item.section.isNotEmpty ? item.section : '—', style: const TextStyle(fontSize: 12))),
-              DataCell(Text(item.units.isNotEmpty ? item.units : '—', style: const TextStyle(fontSize: 12))),
-              DataCell(Text(item.instructor?.isNotEmpty == true ? item.instructor! : '—', style: const TextStyle(fontSize: 12))),
-            ])).toList(),
-          ),
-        ),
-      ),
-    );
+    return ScheduleTable(schedule: schedule);
   }
 
   Widget _gradientCard({required Widget child}) {
