@@ -177,30 +177,87 @@ class _ScheduleTableState extends State<ScheduleTable> {
     final currentDay = _currentDay;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Table(
-        border: TableBorder.all(color: AppColors.outline.withValues(alpha: 0.5), width: 0.5),
-        columnWidths: const {
-          0: FixedColumnWidth(44),
-          1: FixedColumnWidth(64),
-          2: FixedColumnWidth(64),
-          3: FixedColumnWidth(64),
-          4: FixedColumnWidth(64),
-          5: FixedColumnWidth(64),
-          6: FixedColumnWidth(64),
-          7: FixedColumnWidth(64),
-        },
-        defaultVerticalAlignment: TableCellVerticalAlignment.top,
-        children: [
-          TableRow(
-            decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.5)),
-            children: [
-              _headerCell('Time', false),
-              for (var d = 0; d < _days.length; d++)
-                _headerCell(_days[d].substring(0, 3), _days[d] == currentDay),
-            ],
+      child: Container(
+        decoration: BoxDecoration(border: Border.all(color: AppColors.outline.withValues(alpha: 0.5))),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: 44, child: _timeColumn()),
+            for (var d = 0; d < _days.length; d++)
+              SizedBox(width: 64, child: _dayColumn(_days[d], currentDay)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _timeColumn() {
+    return Column(
+      children: [
+        _headerCell('Time', false),
+        for (final hour in _hours)
+          Container(
+            height: 48,
+            alignment: Alignment.center,
+            decoration: _cellDecor(color: AppColors.surfaceVariant.withValues(alpha: 0.5)),
+            child: Text(
+              hour.split(' ').first,
+              style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+            ),
           ),
-          ..._buildGridRows(currentDay),
-        ],
+      ],
+    );
+  }
+
+  Widget _dayColumn(String day, String currentDay) {
+    final isToday = day == currentDay;
+    final cells = <Widget>[_headerCell(day.substring(0, 3), isToday)];
+    var span = 0;
+
+    for (var hIdx = 0; hIdx < _hours.length; hIdx++) {
+      if (span > 0) {
+        span--;
+        continue;
+      }
+
+      final currentHour = 7 + hIdx;
+      ScheduleItem? match;
+      for (final item in widget.schedule) {
+        final d = _getDay(item.time);
+        final range = _parseTimeRange(item.time);
+        if (d == day && range != null && range.start.floor() == currentHour) {
+          match = item;
+          break;
+        }
+      }
+
+      if (match != null) {
+        final range = _parseTimeRange(match.time);
+        final duration = range != null ? range.end.ceil() - range.start.floor() : 1;
+        span = duration - 1;
+        cells.add(_classCell(match, isToday, duration));
+      } else {
+        cells.add(
+          Container(
+            height: 48,
+            decoration: _cellDecor(color: isToday ? AppColors.primary.withValues(alpha: 0.05) : null),
+          ),
+        );
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: cells,
+    );
+  }
+
+  BoxDecoration _cellDecor({Color? color, bool right = true, bool bottom = true}) {
+    return BoxDecoration(
+      color: color,
+      border: Border(
+        right: right ? BorderSide(color: AppColors.outline.withValues(alpha: 0.5)) : BorderSide.none,
+        bottom: bottom ? BorderSide(color: AppColors.outline.withValues(alpha: 0.5)) : BorderSide.none,
       ),
     );
   }
@@ -210,6 +267,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
       height: 46,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: _cellDecor(color: AppColors.surfaceVariant.withValues(alpha: 0.5)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -226,83 +284,18 @@ class _ScheduleTableState extends State<ScheduleTable> {
               width: 4,
               height: 4,
               margin: const EdgeInsets.only(top: 4),
-              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
             ),
         ],
       ),
     );
   }
 
-  List<TableRow> _buildGridRows(String currentDay) {
-    final rows = <TableRow>[];
-    final cellSpans = List<int>.filled(_days.length, 0);
-
-    for (var hIdx = 0; hIdx < _hours.length; hIdx++) {
-      final currentHour = 7 + hIdx;
-      final cells = <Widget>[
-        Container(
-          height: 48,
-          alignment: Alignment.center,
-          color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-          child: Text(
-            _hours[hIdx].split(' ').first,
-            style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
-          ),
-        ),
-      ];
-
-      for (var dayIdx = 0; dayIdx < _days.length; dayIdx++) {
-        if (cellSpans[dayIdx] > 0) {
-          cellSpans[dayIdx]--;
-          continue;
-        }
-
-        ScheduleItem? match;
-        for (final item in widget.schedule) {
-          final day = _getDay(item.time);
-          final range = _parseTimeRange(item.time);
-          if (day == _days[dayIdx] && range != null && range.start.floor() == currentHour) {
-            match = item;
-            break;
-          }
-        }
-
-        if (match != null) {
-          final range = _parseTimeRange(match.time);
-          final duration = range != null ? range.end.ceil() - range.start.floor() : 1;
-          if (duration > 1) cellSpans[dayIdx] = duration - 1;
-          cells.add(
-            TableCell(
-              rowSpan: duration,
-              child: _classCell(match, _days[dayIdx] == currentDay),
-            ),
-          );
-        } else {
-          cells.add(
-            TableCell(
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _days[dayIdx] == currentDay ? AppColors.primary.withValues(alpha: 0.05) : null,
-                ),
-              ),
-            ),
-          );
-        }
-      }
-
-      rows.add(TableRow(children: cells));
-    }
-
-    return rows;
-  }
-
-  Widget _classCell(ScheduleItem item, bool isToday) {
+  Widget _classCell(ScheduleItem item, bool isToday, int duration) {
     return Container(
+      height: (duration * 48).toDouble(),
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: isToday ? AppColors.primary.withValues(alpha: 0.05) : null,
-      ),
+      decoration: _cellDecor(color: isToday ? AppColors.primary.withValues(alpha: 0.05) : null),
       child: Material(
         color: AppColors.surfaceVariant,
         borderRadius: BorderRadius.circular(6),
@@ -549,7 +542,6 @@ class _ScheduleTableState extends State<ScheduleTable> {
                         style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          fontFamilyFallback: const ['monospace'],
                           color: AppColors.primary,
                         ),
                       ),
@@ -565,7 +557,6 @@ class _ScheduleTableState extends State<ScheduleTable> {
                         style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          fontFamilyFallback: const ['monospace'],
                           color: AppColors.primary,
                         ),
                       ),
