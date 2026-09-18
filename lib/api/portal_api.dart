@@ -490,41 +490,53 @@ class PortalApi {
     _updateCookies(http.Response('', streamedResponse.statusCode, headers: streamedResponse.headers));
 
     final buffer = StringBuffer();
+    final pending = StringBuffer();
     var yieldedLen = 0;
 
     await for (final chunk in streamedResponse.stream.transform(utf8.decoder)) {
-      for (final line in chunk.split('\n')) {
-        if (line.isEmpty) continue;
+      pending.write(chunk);
+      var text = pending.toString();
+      var nl = text.indexOf('\n');
+      while (nl >= 0) {
+        final line = text.substring(0, nl);
+        text = text.substring(nl + 1);
+        pending.clear();
+        pending.write(text);
 
         final trimmed = line.trim();
-        if (trimmed.startsWith('STATUS:')) {
+        if (trimmed.startsWith('STATUS:') || trimmed.startsWith('TOOL_USED:')) {
           yield trimmed;
-          continue;
+        } else {
+          buffer.write(line);
+          if (buffer.isNotEmpty) buffer.write('\n');
+          final contentText = buffer.toString();
+          yield* _yieldCleaned(contentText, yieldedLen, (p) => yieldedLen = p);
         }
-        if (trimmed.startsWith('TOOL_USED:')) {
-          yield trimmed;
-          continue;
-        }
+        text = pending.toString();
+        nl = text.indexOf('\n');
+      }
+    }
 
-        buffer.write(line);
-        final text = buffer.toString();
+    if (pending.isNotEmpty) {
+      buffer.write(pending.toString());
+      yield* _yieldCleaned(buffer.toString(), yieldedLen, (p) => yieldedLen = p);
+    }
+  }
 
-        final lastOpen = text.lastIndexOf('<thought>');
-        final lastClose = text.lastIndexOf('</thought>');
+  static Stream<String> _yieldCleaned(
+      String text, int yieldedLen, void Function(int) setLen) async* {
+    final lastOpen = text.lastIndexOf('<thought>');
+    final lastClose = text.lastIndexOf('</thought>');
+    if (lastOpen > lastClose) return;
 
-        if (lastOpen > lastClose) {
-          continue;
-        }
-        final cleaned = text.replaceAll(
-          RegExp(r'<thought>[\s\S]*?</thought>', dotAll: true), '');
+    final cleaned =
+        text.replaceAll(RegExp(r'<thought>[\s\S]*?</thought>', dotAll: true), '');
 
-        if (cleaned.length > yieldedLen) {
-          final newPart = cleaned.substring(yieldedLen);
-          yieldedLen = cleaned.length;
-          if (newPart.trim().isNotEmpty) {
-            yield newPart;
-          }
-        }
+    if (cleaned.length > yieldedLen) {
+      final newPart = cleaned.substring(yieldedLen);
+      setLen(cleaned.length);
+      if (newPart.trim().isNotEmpty) {
+        yield newPart;
       }
     }
   }

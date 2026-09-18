@@ -7,6 +7,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/latex.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 class AssistantScreen extends StatefulWidget {
@@ -225,7 +226,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
         .trim();
   }
 
-  final MarkdownGenerator _generator = MarkdownGenerator();
+  final MarkdownGenerator _generator = MarkdownGenerator(
+    generators: [latexGenerator],
+    inlineSyntaxList: [LatexSyntax()],
+  );
 
   MarkdownConfig _buildConfig(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
