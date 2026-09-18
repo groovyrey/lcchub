@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/author_avatar.dart';
+import '../../widgets/staff_badge.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 class PostDetailScreen extends StatefulWidget {
@@ -9,7 +11,7 @@ class PostDetailScreen extends StatefulWidget {
   final List<CommunityComment> comments;
   final bool isLoading;
   final String? currentUserId;
-  final Function(String) onAddComment;
+  final Function(String, String?) onAddComment;
   final Function(String, int) onVotePoll;
   final Function(String) onLikePost;
   final Function(String) onDeletePost;
@@ -40,12 +42,25 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   final _commentController = TextEditingController();
+  final _replyController = TextEditingController();
+  CommunityComment? _replyTo;
 
   @override
   void dispose() {
     _commentController.dispose();
+    _replyController.dispose();
     super.dispose();
   }
+
+  Map<String?, List<CommunityComment>> get _childrenMap {
+    final map = <String?, List<CommunityComment>>{};
+    for (final c in widget.comments) {
+      map.putIfAbsent(c.parentId, () => []).add(c);
+    }
+    return map;
+  }
+
+  List<CommunityComment> get _topLevelComments => _childrenMap[null] ?? [];
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +110,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ],
                   ),
                   const Divider(height: 32),
-                  ...widget.comments.map((c) => GestureDetector(
-                    onLongPress: () => _showCommentActions(c),
-                    child: _commentTile(c),
-                  )),
+                  ..._topLevelComments.map((c) => _renderComment(c, 0)),
                 ],
               ],
             ),
@@ -130,7 +142,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     onPressed: () {
                       final text = _commentController.text.trim();
                       if (text.isNotEmpty) {
-                        widget.onAddComment(text);
+                        widget.onAddComment(text, null);
                         _commentController.clear();
                       }
                     },
@@ -243,26 +255,37 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final displayName = post.isAnonymous ? 'Anonymous' : post.userName;
     return Row(
       children: [
-        CircleAvatar(
+        AuthorAvatar(
+          name: displayName,
+          photoUrl: post.isAnonymous ? null : post.userPhoto,
           radius: 18,
-          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-          child: Text(displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary)),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: post.isAnonymous ? null : () => widget.onAuthorTap(post.userId),
-              child: Text(displayName, style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: post.isAnonymous ? AppColors.onSurface : AppColors.primary,
-              )),
-            ),
-            Text(_timeAgo(post.createdAt), style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: post.isAnonymous ? null : () => widget.onAuthorTap(post.userId),
+                      child: Text(displayName, style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: post.isAnonymous ? AppColors.onSurface : AppColors.primary,
+                      ), overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                  if (post.isStaff && !post.isAnonymous) ...[
+                    const SizedBox(width: 4),
+                    const StaffBadge(),
+                  ],
+                ],
+              ),
+              Text(_timeAgo(post.createdAt), style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+            ],
+          ),
         ),
       ],
     );
@@ -364,9 +387,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _commentTile(CommunityComment comment) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+  Widget _renderComment(CommunityComment comment, int depth) {
+    final replies = _childrenMap[comment.id] ?? [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onLongPress: () => _showCommentActions(comment),
+          child: _commentTile(comment, depth),
+        ),
+        if (_replyTo?.id == comment.id) _replyComposer(comment),
+        ...replies.map((r) => _renderComment(r, depth + 1)),
+      ],
+    );
+  }
+
+  Widget _commentTile(CommunityComment comment, int depth) {
+    final tile = Container(
+      margin: EdgeInsets.only(bottom: 12, top: depth > 0 ? 4 : 0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant.withValues(alpha: 0.5),
@@ -377,20 +415,31 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         children: [
           Row(
             children: [
-              CircleAvatar(
+              AuthorAvatar(
+                name: comment.userName,
+                photoUrl: comment.userPhoto,
                 radius: 14,
                 backgroundColor: AppColors.secondary.withValues(alpha: 0.1),
-                child: Text(comment.userName.isNotEmpty ? comment.userName[0].toUpperCase() : '?',
-                    style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.secondary)),
+                foregroundColor: AppColors.secondary,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () => widget.onAuthorTap(comment.userId),
-                      child: Text(comment.userName, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () => widget.onAuthorTap(comment.userId),
+                            child: Text(comment.userName, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary), overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                        if (comment.isStaff) ...[
+                          const SizedBox(width: 4),
+                          const StaffBadge(size: 12),
+                        ],
+                      ],
                     ),
                     Text(_timeAgo(comment.createdAt), style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
                   ],
@@ -400,9 +449,112 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(comment.content, style: GoogleFonts.poppins(fontSize: 13)),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () {
+              if (widget.currentUserId == null) return;
+              setState(() {
+                _replyTo = _replyTo?.id == comment.id ? null : comment;
+              });
+              if (_replyTo?.id == comment.id) {
+                _replyController.clear();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  FocusScope.of(context).nextFocus();
+                });
+              }
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(PhosphorIcons.arrowBendUpLeft(), size: 14, color: AppColors.onSurfaceVariant),
+                const SizedBox(width: 4),
+                Text('Reply', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+              ],
+            ),
+          ),
         ],
       ),
     );
+
+    if (depth == 0) return tile;
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(left: BorderSide(color: AppColors.outline.withValues(alpha: 0.3), width: 2)),
+        ),
+        padding: const EdgeInsets.only(left: 10),
+        child: tile,
+      ),
+    );
+  }
+
+  Widget _replyComposer(CommunityComment comment) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Replying to ${comment.userName}',
+                  style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: Icon(PhosphorIcons.x(), size: 14, color: AppColors.onSurfaceVariant),
+                onPressed: () => setState(() => _replyTo = null),
+              ),
+            ],
+          ),
+          TextField(
+            controller: _replyController,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'Write a reply...',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              filled: true,
+              fillColor: AppColors.surface,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              isDense: true,
+            ),
+            maxLines: null,
+            minLines: 1,
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _replyTo == null ? null : _sendReply,
+              icon: Icon(PhosphorIcons.paperPlaneRight(), size: 16),
+              label: Text('Reply', style: GoogleFonts.poppins(fontSize: 13)),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                disabledForegroundColor: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendReply() {
+    final target = _replyTo;
+    final text = _replyController.text.trim();
+    if (target == null || text.isEmpty) return;
+    widget.onAddComment(text, target.id);
+    _replyController.clear();
+    setState(() => _replyTo = null);
   }
 
   void _showPostActions(CommunityPost post) {

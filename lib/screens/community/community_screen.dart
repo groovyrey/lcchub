@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/author_avatar.dart';
+import '../../widgets/staff_badge.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 class CommunityScreen extends StatefulWidget {
@@ -172,24 +174,33 @@ class _CommunityScreenState extends State<CommunityScreen> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
+                  AuthorAvatar(
+                    name: displayName,
+                    photoUrl: post.isAnonymous ? null : post.userPhoto,
                     radius: 16,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    child: Text(displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: post.isAnonymous ? null : () => widget.onAuthorTap(post.userId),
-                          child: Text(displayName, style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: post.isAnonymous ? AppColors.onSurface : AppColors.primary,
-                          )),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: GestureDetector(
+                                onTap: post.isAnonymous ? null : () => widget.onAuthorTap(post.userId),
+                                child: Text(displayName, style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: post.isAnonymous ? AppColors.onSurface : AppColors.primary,
+                                ), overflow: TextOverflow.ellipsis),
+                              ),
+                            ),
+                            if (post.isStaff && !post.isAnonymous) ...[
+                              const SizedBox(width: 4),
+                              const StaffBadge(size: 13),
+                            ],
+                          ],
                         ),
                         Text(_formatTime(post.createdAt), style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
                       ],

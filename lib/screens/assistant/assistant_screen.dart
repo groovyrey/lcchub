@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_highlight/themes/a11y-dark.dart';
+import 'package:flutter_highlight/themes/a11y-light.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:markdown_widget/markdown_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 
@@ -178,69 +182,102 @@ class _AssistantScreenState extends State<AssistantScreen> {
 
   Widget _messageBubble(ChatMessage msg) {
     final isUser = msg.role == 'user';
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
-        child: Column(
-          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (!isUser)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(msg.status ?? 'Assistant', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
-              ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isUser ? AppColors.primary : AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: isUser
-                  ? Text(msg.content, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white))
-                  : MarkdownBody(
-                      data: msg.content,
-                      styleSheet: MarkdownStyleSheet(
-                        p: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurface, height: 1.5),
-                        h1: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface),
-                        h2: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
-                        h3: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-                        h4: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-                        h5: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-                        h6: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
-                        em: GoogleFonts.poppins(fontSize: 14, fontStyle: FontStyle.italic, color: AppColors.onSurface),
-                        strong: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
-                        blockquote: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurfaceVariant),
-                        blockquoteDecoration: BoxDecoration(
-                          border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
-                          color: AppColors.primary.withValues(alpha: 0.05),
-                        ),
-                        blockquotePadding: const EdgeInsets.all(12),
-                        code: GoogleFonts.poppins(fontSize: 13, color: AppColors.primary, backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5)),
-                        codeblockDecoration: BoxDecoration(
-                          color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        codeblockPadding: const EdgeInsets.all(12),
-                        listBullet: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurface),
-                        listIndent: 24,
-                        listBulletPadding: const EdgeInsets.only(right: 8),
-                        tableHead: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-                        tableBody: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurface),
-                        tableBorder: TableBorder.all(color: AppColors.outline.withValues(alpha: 0.3), width: 1),
-                        tableCellsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        horizontalRuleDecoration: BoxDecoration(
-                          border: Border(top: BorderSide(color: AppColors.outline.withValues(alpha: 0.3), width: 1)),
-                        ),
-                        a: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary, decoration: TextDecoration.underline),
-                      ),
-                    ),
-            ),
-          ],
+    if (isUser) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(msg.content, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         ),
+      );
+    }
+
+    final content = _stripThinking(msg.content);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (msg.status != null && (widget.isGenerating || content.isEmpty))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(msg.status!, style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
+            ),
+          if (content.trim().isNotEmpty)
+            ..._generator.buildWidgets(content, config: _buildConfig(context)),
+        ],
       ),
     );
+  }
+
+  String _stripThinking(String content) {
+    return content
+        .replaceAll(
+          RegExp(r'<(thought|think|reasoning)>[\s\S]*?(?:</\1>|$)', caseSensitive: false),
+          '',
+        )
+        .trim();
+  }
+
+  final MarkdownGenerator _generator = MarkdownGenerator();
+
+  MarkdownConfig _buildConfig(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig;
+    return base.copy(configs: [
+      PConfig(
+        textStyle: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurface, height: 1.5),
+      ),
+      H1Config(
+        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
+      ),
+      H2Config(
+        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
+      ),
+      H3Config(
+        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+      ),
+      CodeConfig(
+        style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primary, backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5)),
+      ),
+      PreConfig(
+        theme: isDark ? a11yDarkTheme : a11yLightTheme,
+        textStyle: GoogleFonts.spaceMono(fontSize: 13, color: isDark ? Colors.white : Colors.black87),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xff3a3a3a) : const Color(0xfff3f4f6),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.fromLTRB(12, 12, 56, 12),
+        wrapper: (child, code, language) => _CodeBlockWrapper(child: child, code: code, language: language),
+      ),
+      BlockquoteConfig(
+        textColor: AppColors.onSurfaceVariant,
+        sideColor: AppColors.primary,
+      ),
+      LinkConfig(
+        style: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary, decoration: TextDecoration.underline),
+        onTap: (url) async {
+          final uri = Uri.tryParse(url);
+          if (uri != null) {
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (_) {}
+          }
+        },
+      ),
+      TableConfig(
+        wrapper: (table) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: table,
+        ),
+      ),
+    ]);
   }
 
   void _send() {
@@ -254,5 +291,74 @@ class _AssistantScreenState extends State<AssistantScreen> {
   void _sendWith(String text) {
     widget.onSendMessage(text);
     _scrollToBottom();
+  }
+}
+
+class _CodeBlockWrapper extends StatefulWidget {
+  final Widget child;
+  final String code;
+  final String language;
+
+  const _CodeBlockWrapper({required this.child, required this.code, required this.language});
+
+  @override
+  State<_CodeBlockWrapper> createState() => _CodeBlockWrapperState();
+}
+
+class _CodeBlockWrapperState extends State<_CodeBlockWrapper> {
+  bool _copied = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        widget.child,
+        Positioned(
+          top: 6,
+          right: 8,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.language.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(right: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.15)
+                        : Colors.black.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    widget.language,
+                    style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54),
+                  ),
+                ),
+              InkWell(
+                onTap: _copy,
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    _copied ? PhosphorIcons.check() : PhosphorIcons.copy(),
+                    size: 14,
+                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.code));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _copied = false);
+    });
   }
 }

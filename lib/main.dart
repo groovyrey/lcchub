@@ -547,7 +547,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           comments: state.postComments,
           isLoading: state.isPostLoading,
           currentUserId: state.student?.id,
-          onAddComment: (c) => state.addComment(postId, c),
+          onAddComment: (c, parentId) => state.addComment(postId, c, parentId: parentId),
           onVotePoll: (postId, idx) => state.votePoll(postId, idx),
           onLikePost: (id) => state.likePost(id),
           onDeletePost: (id) => state.deletePost(id),
@@ -861,7 +861,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addComment(String postId, String content) async {
+  Future<void> addComment(String postId, String content, {String? parentId}) async {
     final userId = student?.id ?? '';
     final userName = student?.name ?? 'You';
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
@@ -872,15 +872,18 @@ class AppState extends ChangeNotifier {
       userId: userId,
       userName: userName,
       content: content,
+      parentId: parentId,
       createdAt: DateTime.now().toIso8601String(),
     )];
     notifyListeners();
 
-    final result = await PortalApi.addComment(postId, content);
+    final result = await PortalApi.addComment(postId, content, parentId: parentId);
     if (result['success'] == true) {
       final realId = result['id']?.toString() ?? tempId;
       _postComments = _postComments.map((c) =>
-        c.id == tempId ? CommunityComment(id: realId, postId: postId, userId: userId, userName: userName, content: content, createdAt: c.createdAt) : c
+        c.id == tempId
+            ? CommunityComment(id: realId, postId: postId, userId: userId, userName: userName, content: content, parentId: parentId, createdAt: c.createdAt)
+            : c
       ).toList();
     } else {
       _postComments = _postComments.where((c) => c.id != tempId).toList();
@@ -921,6 +924,8 @@ class AppState extends ChangeNotifier {
       likes: updatedLikes,
       commentCount: post.commentCount,
       poll: post.poll,
+      userPhoto: post.userPhoto,
+      isStaff: post.isStaff,
     );
 
     if (_postDetail?.id == postId) {
@@ -955,6 +960,7 @@ class AppState extends ChangeNotifier {
         isAnonymous: post.isAnonymous, createdAt: post.createdAt,
         likes: post.likes, commentCount: post.commentCount,
         poll: Poll(question: post.poll!.question, options: options),
+        userPhoto: post.userPhoto, isStaff: post.isStaff,
       );
     }
 
@@ -985,10 +991,25 @@ class AppState extends ChangeNotifier {
   Future<bool> deleteComment(String postId, String commentId) async {
     final success = await PortalApi.deleteComment(commentId);
     if (success) {
-      _postComments.removeWhere((c) => c.id == commentId);
+      _removeCommentSubtree(commentId);
       notifyListeners();
     }
     return success;
+  }
+
+  void _removeCommentSubtree(String rootId) {
+    final toRemove = <String>{rootId};
+    final queue = [rootId];
+    while (queue.isNotEmpty) {
+      final pid = queue.removeLast();
+      for (final c in _postComments) {
+        if (c.parentId == pid && !toRemove.contains(c.id)) {
+          toRemove.add(c.id);
+          queue.add(c.id);
+        }
+      }
+    }
+    _postComments = _postComments.where((c) => !toRemove.contains(c.id)).toList();
   }
 
   Future<String?> reportPost(String postId) async {
@@ -1008,7 +1029,7 @@ class AppState extends ChangeNotifier {
   Future<String?> reportComment(String postId, String commentId) async {
     final result = await PortalApi.reportComment(commentId);
     if (result['success'] == true && result['decision'] == 'REJECTED') {
-      _postComments.removeWhere((c) => c.id == commentId);
+      _removeCommentSubtree(commentId);
       notifyListeners();
       return result['reason'] as String?;
     }

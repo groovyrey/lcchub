@@ -253,16 +253,25 @@ class PortalApi {
     }
   }
 
-  static Future<Map<String, dynamic>> addComment(String postId, String content) async {
+  static Future<Map<String, dynamic>> addComment(String postId, String content, {String? parentId}) async {
     try {
+      final body = <String, dynamic>{'postId': postId, 'content': content};
+      if (parentId != null && parentId.isNotEmpty) {
+        body['parentId'] = parentId;
+      }
       final response = await http.post(
         Uri.parse('$_baseUrl/api/community/comments'),
         headers: _headers(),
-        body: jsonEncode({'postId': postId, 'content': content}),
+        body: jsonEncode(body),
       );
       _updateCookies(response);
       final data = jsonDecode(response.body);
-      return {'success': data['success'] ?? false, 'error': data['error']};
+      return {
+        'success': data['success'] ?? false,
+        'error': data['error'],
+        'id': data['id'],
+        'comment': data['comment'],
+      };
     } catch (e) {
       return {'success': false, 'error': e.toString()};
     }

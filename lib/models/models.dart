@@ -317,6 +317,8 @@ class CommunityPost {
   final List<String>? likes;
   final int commentCount;
   final Poll? poll;
+  final String? userPhoto;
+  final bool isStaff;
 
   CommunityPost({
     this.id = '',
@@ -330,6 +332,8 @@ class CommunityPost {
     this.likes,
     this.commentCount = 0,
     this.poll,
+    this.userPhoto,
+    this.isStaff = false,
   });
 
   factory CommunityPost.fromJson(Map<String, dynamic> json) {
@@ -345,6 +349,8 @@ class CommunityPost {
       likes: (json['likes'] as List?)?.map((e) => e.toString()).toList(),
       commentCount: json['commentCount'] ?? 0,
       poll: json['poll'] != null ? Poll.fromJson(json['poll']) : null,
+      userPhoto: json['userPhoto'] != null ? json['userPhoto'].toString() : null,
+      isStaff: json['isStaff'] ?? false,
     );
   }
 }
@@ -387,7 +393,10 @@ class CommunityComment {
   final String userId;
   final String userName;
   final String content;
+  final String? parentId;
   final dynamic createdAt;
+  final String? userPhoto;
+  final bool isStaff;
 
   CommunityComment({
     this.id = '',
@@ -395,17 +404,24 @@ class CommunityComment {
     this.userId = '',
     this.userName = '',
     this.content = '',
+    this.parentId,
     this.createdAt,
+    this.userPhoto,
+    this.isStaff = false,
   });
 
   factory CommunityComment.fromJson(Map<String, dynamic> json) {
+    final rawParent = json['parentId'];
     return CommunityComment(
       id: json['id'] ?? '',
       postId: json['postId'] ?? '',
       userId: json['userId'] ?? '',
       userName: json['userName'] ?? '',
       content: json['content'] ?? '',
+      parentId: rawParent != null ? rawParent.toString() : null,
       createdAt: json['createdAt'],
+      userPhoto: json['userPhoto'] != null ? json['userPhoto'].toString() : null,
+      isStaff: json['isStaff'] ?? false,
     );
   }
 }
