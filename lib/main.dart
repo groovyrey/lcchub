@@ -521,6 +521,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         messages: state.chatMessages,
         isGenerating: state.isGenerating,
         error: state.chatError,
+        studentName: state.student?.name,
         onSendMessage: (m) => state.sendMessage(m),
         onStop: () => state.stopGeneration(),
         onClearChat: () => state.clearChat(),
