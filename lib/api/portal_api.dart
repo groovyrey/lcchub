@@ -489,9 +489,10 @@ class PortalApi {
     final streamedResponse = await http.Client().send(request);
     _updateCookies(http.Response('', streamedResponse.statusCode, headers: streamedResponse.headers));
 
-    final buffer = StringBuffer();
     final pending = StringBuffer();
+    final content = StringBuffer();
     var yieldedLen = 0;
+    var inThought = false;
 
     await for (final chunk in streamedResponse.stream.transform(utf8.decoder)) {
       pending.write(chunk);
@@ -507,10 +508,13 @@ class PortalApi {
         if (trimmed.startsWith('STATUS:') || trimmed.startsWith('TOOL_USED:')) {
           yield trimmed;
         } else {
-          buffer.write(line);
-          if (buffer.isNotEmpty) buffer.write('\n');
-          final contentText = buffer.toString();
-          yield* _yieldCleaned(contentText, yieldedLen, (p) => yieldedLen = p);
+          final res = _cleanLine(line, inThought);
+          inThought = res.inThought;
+          if (res.keep) {
+            content.write(res.text);
+            content.write('\n');
+            yield* _yieldDelta(content, yieldedLen, (p) => yieldedLen = p);
+          }
         }
         text = pending.toString();
         nl = text.indexOf('\n');
@@ -518,26 +522,62 @@ class PortalApi {
     }
 
     if (pending.isNotEmpty) {
-      buffer.write(pending.toString());
-      yield* _yieldCleaned(buffer.toString(), yieldedLen, (p) => yieldedLen = p);
-    }
-  }
-
-  static Stream<String> _yieldCleaned(
-      String text, int yieldedLen, void Function(int) setLen) async* {
-    final lastOpen = text.lastIndexOf('<thought>');
-    final lastClose = text.lastIndexOf('</thought>');
-    if (lastOpen > lastClose) return;
-
-    final cleaned =
-        text.replaceAll(RegExp(r'<thought>[\s\S]*?</thought>', dotAll: true), '');
-
-    if (cleaned.length > yieldedLen) {
-      final newPart = cleaned.substring(yieldedLen);
-      setLen(cleaned.length);
-      if (newPart.trim().isNotEmpty) {
-        yield newPart;
+      final res = _cleanLine(pending.toString(), inThought);
+      inThought = res.inThought;
+      if (res.keep && res.text.isNotEmpty) {
+        content.write(res.text);
+        yield* _yieldDelta(content, yieldedLen, (p) => yieldedLen = p);
       }
     }
   }
+
+  static Stream<String> _yieldDelta(
+      StringBuffer content, int yieldedLen, void Function(int) setLen) async* {
+    final full = content.toString();
+    if (full.length > yieldedLen) {
+      final newPart = full.substring(yieldedLen);
+      setLen(full.length);
+      yield newPart;
+    }
+  }
+
+  static bool _isThoughtClose(String text, Match m) =>
+      text.codeUnitAt(m.start + 1) == 47;
+
+  static ({String text, bool keep, bool inThought}) _cleanLine(
+      String text, bool inThought) {
+    final out = StringBuffer();
+    var idx = 0;
+    var inThought0 = inThought;
+
+    for (final m in _thoughtTag.allMatches(text)) {
+      if (inThought0) {
+        if (_isThoughtClose(text, m)) {
+          idx = m.end;
+          inThought0 = false;
+        } else {
+          idx = m.end;
+        }
+      } else if (_isThoughtClose(text, m)) {
+        out.write(text.substring(idx, m.start));
+        idx = m.end;
+      } else {
+        out.write(text.substring(idx, m.start));
+        idx = m.end;
+        inThought0 = true;
+      }
+    }
+
+    if (!inThought0) {
+      out.write(text.substring(idx));
+    }
+
+    final emit = out.toString().replaceAll(_controlMarker, '');
+    final keep = emit.isNotEmpty || (text.trim().isEmpty && !inThought0);
+    return (text: emit, keep: keep, inThought: inThought0);
+  }
+
+  static final _thoughtTag =
+      RegExp(r'<(?:/)?(?:thought|thinking|reasoning|think)>', caseSensitive: false);
+  static final _controlMarker = RegExp(r'(?:STATUS|TOOL_USED):[^\n]*');
 }
