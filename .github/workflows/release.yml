@@ -75,16 +75,19 @@ jobs:
         run: flutter pub get
 
       - name: Configure release signing
-        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
         run: |
-          echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/lcc-upload-keystore.p12
-          chmod 600 android/lcc-upload-keystore.p12
-          cat > android/key.properties <<EOF
-          storeFile=$(pwd)/android/lcc-upload-keystore.p12
-          storePassword=$ANDROID_KEYSTORE_STORE_PASS
-          keyAlias=$ANDROID_KEYSTORE_ALIAS
-          keyPassword=$ANDROID_KEYSTORE_KEY_PASS
-          EOF
+          if [ -n "$ANDROID_KEYSTORE_B64" ]; then
+            echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/lcc-upload-keystore.p12
+            chmod 600 android/lcc-upload-keystore.p12
+            cat > android/key.properties <<EOF
+            storeFile=$(pwd)/android/lcc-upload-keystore.p12
+            storePassword=$ANDROID_KEYSTORE_STORE_PASS
+            keyAlias=$ANDROID_KEYSTORE_ALIAS
+            keyPassword=$ANDROID_KEYSTORE_KEY_PASS
+            EOF
+          else
+            echo "No keystore configured; falling back to debug signing"
+          fi
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
