@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/profile_photo_editor.dart';
 class SettingsScreen extends StatefulWidget {
   final Student? student;
   final bool notificationsEnabled;
@@ -10,6 +11,8 @@ class SettingsScreen extends StatefulWidget {
   final ThemeMode themeMode;
   final Function(ThemeMode) onThemeModeChanged;
   final Function(String, bool) onUpdateSetting;
+  final Future<bool> Function(PickedProfilePhoto) onChangePhoto;
+  final Future<bool> Function() onRemovePhoto;
   final VoidCallback onLogout;
 
   const SettingsScreen({
@@ -20,6 +23,8 @@ class SettingsScreen extends StatefulWidget {
     required this.themeMode,
     required this.onThemeModeChanged,
     required this.onUpdateSetting,
+    required this.onChangePhoto,
+    required this.onRemovePhoto,
     required this.onLogout,
   });
 
@@ -29,6 +34,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late bool _notifEnabled;
+  bool _photoBusy = false;
 
   @override
   void initState() {
@@ -51,33 +57,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         if (s != null) ...[
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.white.withValues(alpha: 0.25),
-                  child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
-                      style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.name, style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
-                      Text('ID: ${s.id}', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
-                      if (s.course.isNotEmpty)
-                        Text(s.course, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
-                    ],
+          InkWell(
+            onTap: _photoBusy ? null : _editPhoto,
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  _buildAvatar(s),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.name, style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text('ID: ${s.id}', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
+                        if (s.course.isNotEmpty)
+                          Text(s.course, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -254,6 +259,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatar(Student s) {
+    final photo = s.profilePhotoUrl;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        CircleAvatar(
+          radius: 28,
+          backgroundColor: Colors.white.withValues(alpha: 0.25),
+          foregroundImage: (photo != null && photo.isNotEmpty) ? NetworkImage(photo) : null,
+          onForegroundImageError: (_, _) {},
+          child: _photoBusy
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+                  style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+        ),
+        Positioned(
+          bottom: -2,
+          right: -2,
+          child: Container(
+            width: 22,
+            height: 22,
+            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: Icon(PhosphorIcons.camera(), size: 13, color: AppColors.primary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _editPhoto() async {
+    final student = widget.student;
+    if (student == null) return;
+    final result = await showProfilePhotoEditor(
+      context: context,
+      currentUrl: student.profilePhotoUrl,
+    );
+    if (!mounted || result == null) return;
+
+    setState(() => _photoBusy = true);
+    var success = false;
+    if (result is PickedProfilePhoto) {
+      success = await widget.onChangePhoto(result);
+    } else if (result == ProfilePhotoAction.remove) {
+      success = await widget.onRemovePhoto();
+    }
+    if (!mounted) return;
+    setState(() => _photoBusy = false);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.poppins(fontSize: 13)),
+    ));
   }
 
   void _showLogoutDialog(BuildContext context) {

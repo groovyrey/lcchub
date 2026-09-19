@@ -233,11 +233,9 @@ class _AssistantScreenState extends State<AssistantScreen> {
 
   MarkdownConfig _buildConfig(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig;
-    return base.copy(configs: [
-      PConfig(
-        textStyle: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurface, height: 1.5),
-      ),
+    final body = GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurface, height: 1.5);
+    return MarkdownConfig(configs: [
+      PConfig(textStyle: body),
       H1Config(
         style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
       ),
@@ -246,6 +244,15 @@ class _AssistantScreenState extends State<AssistantScreen> {
       ),
       H3Config(
         style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+      ),
+      H4Config(
+        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+      ),
+      H5Config(
+        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+      ),
+      H6Config(
+        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
       ),
       CodeConfig(
         style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primary, backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5)),
@@ -276,11 +283,15 @@ class _AssistantScreenState extends State<AssistantScreen> {
         },
       ),
       TableConfig(
+        border: TableBorder.all(color: AppColors.outline),
+        headerStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface),
+        bodyStyle: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurface),
         wrapper: (table) => SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: table,
         ),
       ),
+      HrConfig(color: AppColors.outline),
     ]);
   }
 

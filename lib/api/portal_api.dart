@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../models/models.dart';
 
 class PortalApi {
@@ -138,6 +140,53 @@ class PortalApi {
       return null;
     } catch (_) {
       return null;
+    }
+  }
+
+  static Future<String?> uploadAvatar(
+      Uint8List bytes, {
+      String filename = 'avatar.jpg',
+      String mimeType = 'image/jpeg',
+    }) async {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$_baseUrl/api/cloudinary/upload'),
+      );
+      final cookieStr = _cookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+      if (cookieStr.isNotEmpty) request.headers['Cookie'] = cookieStr;
+      request.headers['Accept'] = 'application/json';
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: filename,
+        contentType: MediaType.parse(mimeType),
+      ));
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+      _updateCookies(response);
+      final data = jsonDecode(response.body);
+      if (data['success'] == true && data['url'] != null) {
+        return data['url'] as String;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<bool> updateProfilePhoto(String? url) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$_baseUrl/api/student/profile'),
+        headers: _headers(),
+        body: jsonEncode({'profilePhotoUrl': url}),
+      );
+      _updateCookies(response);
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (_) {
+      return false;
     }
   }
 

@@ -2,6 +2,7 @@ class Student {
   final String name;
   final String id;
   final String course;
+  final String? profilePhotoUrl;
   final String? email;
   final String? address;
   final String? mobile;
@@ -17,10 +18,13 @@ class Student {
   final List<String>? badges;
   final StudentSettings? settings;
 
+  static const _unsetPhoto = Object();
+
   Student({
     this.name = '',
     this.id = '',
     this.course = '',
+    this.profilePhotoUrl,
     this.email,
     this.address,
     this.mobile,
@@ -37,9 +41,10 @@ class Student {
     this.settings,
   });
 
-  Student copyWith({StudentSettings? settings}) {
+  Student copyWith({StudentSettings? settings, Object? profilePhotoUrl = _unsetPhoto}) {
     return Student(
-      name: name, id: id, course: course, email: email,
+      name: name, id: id, course: course, profilePhotoUrl: identical(profilePhotoUrl, _unsetPhoto) ? this.profilePhotoUrl : profilePhotoUrl as String?,
+      email: email,
       address: address, mobile: mobile, enrollmentDate: enrollmentDate,
       schoolYear: schoolYear, yearLevel: yearLevel, semester: semester,
       section: section, schedule: schedule, financials: financials,
@@ -53,6 +58,7 @@ class Student {
       name: json['name'] ?? '',
       id: json['id'] ?? '',
       course: json['course'] ?? '',
+      profilePhotoUrl: json['profilePhotoUrl'] != null ? json['profilePhotoUrl'].toString() : null,
       email: json['email'],
       address: json['address'],
       mobile: json['mobile'],

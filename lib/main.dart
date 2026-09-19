@@ -25,6 +25,7 @@ import 'screens/about/about_screen.dart';
 import 'screens/assistant/assistant_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'widgets/notification_drawer.dart';
+import 'widgets/profile_photo_editor.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 void main() async {
@@ -425,7 +426,7 @@ class _AppScaffoldState extends State<AppScaffold> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => ProfileScreen(userId: state.student?.id ?? ''),
+                  builder: (_) => ProfileScreen(userId: state.student?.id ?? '', isOwner: true),
                 ));
               },
               child: Column(
@@ -531,6 +532,8 @@ class _AppScaffoldState extends State<AppScaffold> {
         themeMode: state.themeMode,
         onThemeModeChanged: (mode) => state.setThemeMode(mode),
         onUpdateSetting: (key, value) => state.updateSetting(key, value),
+        onChangePhoto: state.setProfilePhoto,
+        onRemovePhoto: state.removeProfilePhoto,
         onLogout: () => state.logout(),
       ),
       'about' => const AboutScreen(),
@@ -562,7 +565,10 @@ class _AppScaffoldState extends State<AppScaffold> {
 
   void _openProfile(BuildContext context, String userId) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (_) => ProfileScreen(userId: userId),
+      builder: (_) => ProfileScreen(
+        userId: userId,
+        isOwner: context.read<AppState>().student?.id == userId,
+      ),
     ));
   }
 
@@ -1193,6 +1199,36 @@ class AppState extends ChangeNotifier {
 
   Future<void> _updateSettings(Map<String, dynamic> settings) async {
     await PortalApi.updateSettings(settings);
+  }
+
+  Future<bool> setProfilePhoto(PickedProfilePhoto input) async {
+    final url = await PortalApi.uploadAvatar(
+      input.bytes,
+      filename: input.filename,
+      mimeType: input.mimeType,
+    );
+    if (url == null) return false;
+    final ok = await PortalApi.updateProfilePhoto(url);
+    if (!ok) return false;
+    final student = _student;
+    if (student != null) {
+      _student = student.copyWith(profilePhotoUrl: url);
+      _storage.studentData = _student;
+      notifyListeners();
+    }
+    return true;
+  }
+
+  Future<bool> removeProfilePhoto() async {
+    final ok = await PortalApi.updateProfilePhoto(null);
+    if (!ok) return false;
+    final student = _student;
+    if (student != null) {
+      _student = student.copyWith(profilePhotoUrl: null);
+      _storage.studentData = _student;
+      notifyListeners();
+    }
+    return true;
   }
 
   void setThemeMode(ThemeMode mode) {

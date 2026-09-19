@@ -3,11 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../api/portal_api.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/profile_photo_editor.dart';
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 class ProfileScreen extends StatefulWidget {
   final String userId;
-  const ProfileScreen({super.key, required this.userId});
+  final bool isOwner;
+  const ProfileScreen({super.key, required this.userId, this.isOwner = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -19,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingProfile = true;
   bool _isLoadingPosts = true;
   String? _error;
+  bool _photoBusy = false;
 
   @override
   void initState() {
@@ -95,12 +98,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildAvatar({double radius = 40}) {
     final name = _profile?['name'] as String? ?? '?';
+    final photoUrl = _profile?['profilePhotoUrl'] as String?;
     final initials = name.split(' ').where((w) => w.isNotEmpty).map((w) => w[0]).take(2).join().toUpperCase();
-    return CircleAvatar(
+
+    final hasPhoto = photoUrl != null && photoUrl.isNotEmpty;
+    final avatar = CircleAvatar(
       radius: radius,
       backgroundColor: Colors.white.withValues(alpha: 0.2),
-      child: Text(initials, style: GoogleFonts.poppins(fontSize: radius * 0.8, fontWeight: FontWeight.bold, color: Colors.white)),
+      foregroundImage: hasPhoto ? NetworkImage(photoUrl) : null,
+      onForegroundImageError: (_, _) {},
+      child: _photoBusy
+          ? Padding(
+              padding: EdgeInsets.all(radius * 0.4),
+              child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            )
+          : Text(initials, style: GoogleFonts.poppins(fontSize: radius * 0.8, fontWeight: FontWeight.bold, color: Colors.white)),
     );
+
+    if (!widget.isOwner) return avatar;
+
+    return GestureDetector(
+      onTap: _photoBusy ? null : _editPhoto,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          avatar,
+          Positioned(
+            bottom: -2,
+            right: -2,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              child: Icon(PhosphorIcons.camera(), size: 14, color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editPhoto() async {
+    final currentUrl = _profile?['profilePhotoUrl'] as String?;
+    final result = await showProfilePhotoEditor(
+      context: context,
+      currentUrl: currentUrl,
+    );
+    if (!mounted || result == null) return;
+
+    setState(() => _photoBusy = true);
+    var success = false;
+    if (result is PickedProfilePhoto) {
+      final url = await PortalApi.uploadAvatar(
+        result.bytes,
+        filename: result.filename,
+        mimeType: result.mimeType,
+      );
+      if (url != null) {
+        success = await PortalApi.updateProfilePhoto(url);
+      }
+    } else if (result == ProfilePhotoAction.remove) {
+      success = await PortalApi.updateProfilePhoto(null);
+    }
+
+    if (!mounted) return;
+    setState(() => _photoBusy = false);
+    if (success) {
+      _loadData();
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.poppins(fontSize: 13)),
+    ));
   }
 
   Widget _buildProfileHeader() {
