@@ -76,23 +76,21 @@ jobs:
 
       - name: Configure release signing
         run: |
-          if [ -n "$ANDROID_KEYSTORE_B64" ]; then
+            if [ -n "$ANDROID_KEYSTORE_B64" ]; then
             echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/lcc-upload-keystore.p12
             chmod 600 android/lcc-upload-keystore.p12
-            cat > android/key.properties <<EOF
-            storeFile=$(pwd)/android/lcc-upload-keystore.p12
-            storePassword=$ANDROID_KEYSTORE_STORE_PASS
-            keyAlias=$ANDROID_KEYSTORE_ALIAS
-            keyPassword=$ANDROID_KEYSTORE_KEY_PASS
-            EOF
-          else
+            printf 'storeFile=%s/android/lcc-upload-keystore.p12\n' "$PWD" > android/key.properties
+            printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_STORE_PASS" >> android/key.properties
+            printf 'keyAlias=%s\n' "$ANDROID_KEYSTORE_ALIAS" >> android/key.properties
+            printf 'keyPassword=%s\n' "$ANDROID_KEYSTORE_KEY_PASS" >> android/key.properties
+            else
             echo "No keystore configured; falling back to debug signing"
-          fi
+            fi
         env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
-          ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}
-          ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+            ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+            ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
+            ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}
+            ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
 
       - name: Extract version
         id: version
