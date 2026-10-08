@@ -17,9 +17,6 @@ import 'screens/login/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/grades/grades_screen.dart';
 import 'screens/accounts/accounts_screen.dart';
-import 'screens/community/community_screen.dart';
-import 'screens/community/post_detail_screen.dart';
-import 'screens/community/create_post_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/about/about_screen.dart';
 import 'screens/assistant/assistant_screen.dart';
@@ -235,11 +232,11 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
-  static const _screens = ['dashboard', 'grades', 'accounts', 'community', 'assistant', 'settings', 'about'];
-  static const _labels = ['Home', 'Grades', 'Accounts', 'Community', 'Assistant', 'Settings', 'About'];
+  static const _screens = ['dashboard', 'grades', 'accounts', 'assistant', 'settings', 'about'];
+  static const _labels = ['Home', 'Grades', 'Accounts', 'Assistant', 'Settings', 'About'];
   static final _icons = [
     PhosphorIcons.house(), PhosphorIcons.exam(), PhosphorIcons.receipt(),
-    PhosphorIcons.chats(PhosphorIconsStyle.fill), PhosphorIcons.robot(PhosphorIconsStyle.fill), PhosphorIcons.gearSix(), PhosphorIcons.info(),
+    PhosphorIcons.robot(PhosphorIconsStyle.fill), PhosphorIcons.gearSix(), PhosphorIcons.info(),
   ];
 
   @override
@@ -470,11 +467,6 @@ class _AppScaffoldState extends State<AppScaffold> {
                   onTap: () {
                     setState(() => _currentIndex = index);
                     Navigator.pop(context);
-                    if (widget.screens[index] == 'community') {
-                      state.startCommunityPolling();
-                    } else {
-                      state.stopCommunityPolling();
-                    }
                   },
                 );
               },
@@ -497,26 +489,6 @@ class _AppScaffoldState extends State<AppScaffold> {
         onSemesterClick: (r) => state.loadGrades(r),
       ),
       'accounts' => AccountsScreen(financials: state.student?.financials, onRefresh: () => state.refreshStudent()),
-      'community' => CommunityScreen(
-        posts: state.communityPosts,
-        hasMore: state.hasMorePosts,
-        isLoading: state.isCommunityLoading,
-        selectedTopic: state.selectedTopic,
-        searchQuery: state.searchQuery,
-        currentUserId: state.student?.id,
-        onTopicSelected: (t) => state.setTopic(t),
-        onSearchChanged: (q) => state.setSearch(q),
-        onSortChanged: (s) => state.setSort(s),
-        onLikePost: (id) => state.likePost(id),
-        onPostClick: (id) => _openPost(context, id),
-        onVotePoll: (postId, idx) => state.votePoll(postId, idx),
-        onDeletePost: (id) => state.deletePost(id),
-        onReportPost: (id) => state.reportPost(id),
-        onAuthorTap: (userId) => _openProfile(context, userId),
-        onCreatePost: () => _createPost(context),
-        onLoadMore: () => state.loadMorePosts(),
-        onRefresh: () => state.refreshCommunity(),
-      ),
       'assistant' => AssistantScreen(
         messages: state.chatMessages,
         isGenerating: state.isGenerating,
@@ -541,49 +513,6 @@ class _AppScaffoldState extends State<AppScaffold> {
       _ => const SizedBox.shrink(),
     };
   }
-
-  void _openPost(BuildContext context, String postId) {
-    context.read<AppState>().loadPostDetail(postId);
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => Consumer<AppState>(
-        builder: (context, state, _) => PostDetailScreen(
-          post: state.postDetail,
-          comments: state.postComments,
-          isLoading: state.isPostLoading,
-          currentUserId: state.student?.id,
-          onAddComment: (c, parentId) => state.addComment(postId, c, parentId: parentId),
-          onVotePoll: (postId, idx) => state.votePoll(postId, idx),
-          onLikePost: (id) => state.likePost(id),
-          onDeletePost: (id) => state.deletePost(id),
-          onReportPost: (id) => state.reportPost(id),
-          onDeleteComment: (postId, commentId) => state.deleteComment(postId, commentId),
-          onReportComment: (postId, commentId) => state.reportComment(postId, commentId),
-          onAuthorTap: (userId) => _openProfile(context, userId),
-        ),
-      ),
-    ));
-  }
-
-  void _openProfile(BuildContext context, String userId) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => ProfileScreen(
-        userId: userId,
-        isOwner: context.read<AppState>().student?.id == userId,
-      ),
-    ));
-  }
-
-  void _createPost(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => Consumer<AppState>(
-        builder: (context, state, _) => CreatePostScreen(
-          onSubmit: (content, topic, anon, poll) {
-            state.createPost(content, topic: topic, isAnonymous: anon, poll: poll);
-          },
-        ),
-      ),
-    ));
-  }
 }
 
 class AppState extends ChangeNotifier {
@@ -600,28 +529,15 @@ class AppState extends ChangeNotifier {
   Map<String, List<SubjectGrade>> _loadedGrades = {};
   String? _loadingSemesterHref;
 
-  List<CommunityPost> _communityPosts = [];
-  bool _hasMorePosts = false;
-  bool _isCommunityLoading = false;
-  String? _selectedTopic;
-  String _searchQuery = '';
-  String _sortOrder = 'recent';
-  int _communityOffset = 0;
-
   bool _isOffline = false;
   DateTime? _lastDataUpdate;
   final _offlineService = OfflineService();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
-  CommunityPost? _postDetail;
-  List<CommunityComment> _postComments = [];
-  bool _isPostLoading = false;
-
   List<ChatMessage> _chatMessages = [];
   bool _isGenerating = false;
   String? _chatError;
   StreamSubscription<String>? _chatSubscription;
-  Timer? _communityPollTimer;
   Timer? _dataRefreshTimer;
   Timer? _notifPollTimer;
 
@@ -640,14 +556,6 @@ class AppState extends ChangeNotifier {
   List<ReportLink> get reports => _reports;
   Map<String, List<SubjectGrade>> get loadedGrades => _loadedGrades;
   String? get loadingSemesterHref => _loadingSemesterHref;
-  List<CommunityPost> get communityPosts => _communityPosts;
-  bool get hasMorePosts => _hasMorePosts;
-  bool get isCommunityLoading => _isCommunityLoading;
-  String? get selectedTopic => _selectedTopic;
-  String get searchQuery => _searchQuery;
-  CommunityPost? get postDetail => _postDetail;
-  List<CommunityComment> get postComments => _postComments;
-  bool get isPostLoading => _isPostLoading;
   List<ChatMessage> get chatMessages => _chatMessages;
   bool get isGenerating => _isGenerating;
   String? get chatError => _chatError;
@@ -680,7 +588,6 @@ class AppState extends ChangeNotifier {
       _refreshInBackground();
       _startDataRefreshTimer();
       startNotifPolling();
-      _loadCommunity();
       _registerDevice();
     }
   }
@@ -738,7 +645,6 @@ class AppState extends ChangeNotifier {
         _remindersEnabled = _student!.settings!.notifications;
       }
       NotificationService.requestPermission().then((_) => _scheduleRemindersIfNeeded());
-      _loadCommunity();
       _startDataRefreshTimer();
       startNotifPolling();
       _registerDevice();
@@ -754,12 +660,9 @@ class AppState extends ChangeNotifier {
     _student = null;
     _reports = [];
     _loadedGrades = {};
-    _communityPosts = [];
     _chatMessages = [];
     _notifications = [];
     _remindersScheduled = false;
-    _communityPollTimer?.cancel();
-    _communityPollTimer = null;
     _notifPollTimer?.cancel();
     _notifPollTimer = null;
     _storage.clear();
@@ -781,266 +684,6 @@ class AppState extends ChangeNotifier {
       _storage.studentData = student;
       notifyListeners();
     }
-  }
-
-  void refreshCommunity() => _loadCommunity(refresh: true);
-
-  void loadMorePosts() => _loadCommunity();
-
-  void startCommunityPolling() {
-    _communityPollTimer?.cancel();
-    if (_communityPosts.isEmpty) {
-      _loadCommunity(refresh: true);
-    }
-    _communityPollTimer = Timer.periodic(const Duration(seconds: 15), (_) => _pollCommunity());
-  }
-
-  void stopCommunityPolling() {
-    _communityPollTimer?.cancel();
-    _communityPollTimer = null;
-  }
-
-  Future<void> _pollCommunity() async {
-    if (!_isLoggedIn || _isCommunityLoading) return;
-    try {
-      final response = await PortalApi.getCommunityPosts(
-        topic: _selectedTopic,
-        search: _searchQuery,
-        sort: _sortOrder,
-        offset: 0,
-      );
-      final incoming = response.posts;
-      if (incoming.isEmpty) return;
-
-      final merged = <CommunityPost>[];
-
-      for (final incomingPost in incoming) {
-        final existingIdx = _communityPosts.indexWhere((p) => p.id == incomingPost.id);
-        if (existingIdx >= 0) {
-          merged.add(incomingPost);
-        } else {
-          merged.add(incomingPost);
-        }
-      }
-
-      for (final oldPost in _communityPosts) {
-        if (!merged.any((p) => p.id == oldPost.id)) {
-          merged.add(oldPost);
-        }
-      }
-
-      _communityPosts = merged;
-      _hasMorePosts = response.hasMore;
-      notifyListeners();
-    } catch (_) {}
-  }
-
-  void setTopic(String? topic) {
-    _selectedTopic = topic == 'All' ? null : topic;
-    _loadCommunity(refresh: true);
-  }
-
-  Timer? _searchDebounce;
-  void setSearch(String query) {
-    _searchQuery = query;
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 400), () => _loadCommunity(refresh: true));
-    notifyListeners();
-  }
-
-  void setSort(String sort) {
-    _sortOrder = sort;
-    _loadCommunity(refresh: true);
-  }
-
-  Future<void> loadPostDetail(String postId) async {
-    _postDetail = null;
-    _postComments = [];
-    _isPostLoading = true;
-    notifyListeners();
-    final result = await PortalApi.getPostDetail(postId);
-    if (result['success'] == true) {
-      _postDetail = result['post'] as CommunityPost?;
-      final commentsResult = await PortalApi.getPostComments(postId);
-      _postComments = (commentsResult['comments'] as List<CommunityComment>?) ?? [];
-    }
-    _isPostLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> addComment(String postId, String content, {String? parentId}) async {
-    final userId = student?.id ?? '';
-    final userName = student?.name ?? 'You';
-    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-
-    _postComments = [..._postComments, CommunityComment(
-      id: tempId,
-      postId: postId,
-      userId: userId,
-      userName: userName,
-      content: content,
-      parentId: parentId,
-      createdAt: DateTime.now().toIso8601String(),
-    )];
-    notifyListeners();
-
-    final result = await PortalApi.addComment(postId, content, parentId: parentId);
-    if (result['success'] == true) {
-      final realId = result['id']?.toString() ?? tempId;
-      _postComments = _postComments.map((c) =>
-        c.id == tempId
-            ? CommunityComment(id: realId, postId: postId, userId: userId, userName: userName, content: content, parentId: parentId, createdAt: c.createdAt)
-            : c
-      ).toList();
-    } else {
-      _postComments = _postComments.where((c) => c.id != tempId).toList();
-    }
-    notifyListeners();
-  }
-
-  Future<void> createPost(String content, {String? topic, bool isAnonymous = false, Map<String, dynamic>? poll}) async {
-    await PortalApi.createPost(content, topic: topic, isAnonymous: isAnonymous, poll: poll);
-    _loadCommunity(refresh: true);
-  }
-
-  Future<void> likePost(String postId) async {
-    final userId = student?.id;
-    if (userId == null) return;
-    final postIdx = _communityPosts.indexWhere((p) => p.id == postId);
-    if (postIdx < 0) return;
-
-    final post = _communityPosts[postIdx];
-    final isLiked = post.likes?.contains(userId) == true;
-
-    final updatedLikes = List<String>.from(post.likes ?? []);
-    if (isLiked) {
-      updatedLikes.remove(userId);
-    } else {
-      updatedLikes.add(userId);
-    }
-
-    _communityPosts[postIdx] = CommunityPost(
-      id: post.id,
-      userId: post.userId,
-      userName: post.userName,
-      content: post.content,
-      topic: post.topic,
-      imageUrl: post.imageUrl,
-      isAnonymous: post.isAnonymous,
-      createdAt: post.createdAt,
-      likes: updatedLikes,
-      commentCount: post.commentCount,
-      poll: post.poll,
-      userPhoto: post.userPhoto,
-      isStaff: post.isStaff,
-    );
-
-    if (_postDetail?.id == postId) {
-      _postDetail = _communityPosts[postIdx];
-    }
-    notifyListeners();
-
-    if (isLiked) {
-      await PortalApi.unlikePost(postId);
-    } else {
-      await PortalApi.likePost(postId);
-    }
-  }
-
-  Future<void> votePoll(String postId, int optionIndex) async {
-    final userId = student?.id;
-    if (userId == null) return;
-
-    void applyVote(List<CommunityPost> list) {
-      final idx = list.indexWhere((p) => p.id == postId);
-      if (idx < 0) return;
-      final post = list[idx];
-      if (post.poll == null) return;
-      final options = post.poll!.options.map((o) => PollOption(
-        id: o.id, text: o.text,
-        votes: List<String>.from(o.votes),
-      )).toList();
-      options[optionIndex].votes.add(userId);
-      list[idx] = CommunityPost(
-        id: post.id, userId: post.userId, userName: post.userName,
-        content: post.content, topic: post.topic, imageUrl: post.imageUrl,
-        isAnonymous: post.isAnonymous, createdAt: post.createdAt,
-        likes: post.likes, commentCount: post.commentCount,
-        poll: Poll(question: post.poll!.question, options: options),
-        userPhoto: post.userPhoto, isStaff: post.isStaff,
-      );
-    }
-
-    applyVote(_communityPosts);
-    if (_postDetail?.id == postId) applyVote([_postDetail!]);
-    notifyListeners();
-
-    final success = await PortalApi.votePoll(postId, optionIndex);
-    if (!success) {
-      _loadCommunity(refresh: true);
-      if (_postDetail?.id == postId) loadPostDetail(postId);
-    }
-  }
-
-  Future<bool> deletePost(String postId) async {
-    final success = await PortalApi.deletePost(postId);
-    if (success) {
-      _communityPosts.removeWhere((p) => p.id == postId);
-      if (_postDetail?.id == postId) {
-        _postDetail = null;
-        _postComments = [];
-      }
-      notifyListeners();
-    }
-    return success;
-  }
-
-  Future<bool> deleteComment(String postId, String commentId) async {
-    final success = await PortalApi.deleteComment(commentId);
-    if (success) {
-      _removeCommentSubtree(commentId);
-      notifyListeners();
-    }
-    return success;
-  }
-
-  void _removeCommentSubtree(String rootId) {
-    final toRemove = <String>{rootId};
-    final queue = [rootId];
-    while (queue.isNotEmpty) {
-      final pid = queue.removeLast();
-      for (final c in _postComments) {
-        if (c.parentId == pid && !toRemove.contains(c.id)) {
-          toRemove.add(c.id);
-          queue.add(c.id);
-        }
-      }
-    }
-    _postComments = _postComments.where((c) => !toRemove.contains(c.id)).toList();
-  }
-
-  Future<String?> reportPost(String postId) async {
-    final result = await PortalApi.reportPost(postId);
-    if (result['success'] == true && result['decision'] == 'REJECTED') {
-      _communityPosts.removeWhere((p) => p.id == postId);
-      if (_postDetail?.id == postId) {
-        _postDetail = null;
-        _postComments = [];
-      }
-      notifyListeners();
-      return result['reason'] as String?;
-    }
-    return null;
-  }
-
-  Future<String?> reportComment(String postId, String commentId) async {
-    final result = await PortalApi.reportComment(commentId);
-    if (result['success'] == true && result['decision'] == 'REJECTED') {
-      _removeCommentSubtree(commentId);
-      notifyListeners();
-      return result['reason'] as String?;
-    }
-    return null;
   }
 
   void sendMessage(String content) {
@@ -1277,7 +920,6 @@ class AppState extends ChangeNotifier {
   void _onReconnect() {
     _lastDataUpdate = DateTime.now();
     _refreshInBackground();
-    _loadCommunity(refresh: true);
   }
 
   void _registerDevice() {
@@ -1312,39 +954,6 @@ class AppState extends ChangeNotifier {
       _offlineService.saveGrades(_loadedGrades);
     }
     _loadingSemesterHref = null;
-    notifyListeners();
-  }
-
-  Future<void> _loadCommunity({bool refresh = false}) async {
-    if (refresh) {
-      _communityOffset = 0;
-      _communityPosts = [];
-    }
-    _isCommunityLoading = true;
-    notifyListeners();
-
-    if (_isOffline) {
-      _communityPosts = _offlineService.cachedPosts;
-      _isCommunityLoading = false;
-      notifyListeners();
-      return;
-    }
-
-    final response = await PortalApi.getCommunityPosts(
-      topic: _selectedTopic,
-      search: _searchQuery,
-      sort: _sortOrder,
-      offset: _communityOffset,
-    );
-    if (_communityOffset == 0) {
-      _communityPosts = response.posts;
-    } else {
-      _communityPosts = [..._communityPosts, ...response.posts];
-    }
-    _hasMorePosts = response.hasMore;
-    _communityOffset += response.posts.length;
-    _isCommunityLoading = false;
-    if (refresh) _offlineService.savePosts(_communityPosts);
     notifyListeners();
   }
 

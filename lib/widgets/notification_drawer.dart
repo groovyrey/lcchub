@@ -317,11 +317,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
   }
 
   void _navigateToLink(String link) {
-    final state = context.read<AppState>();
-    if (link.startsWith('/post/')) {
-      final postId = link.replaceFirst('/post/', '');
-      state.loadPostDetail(postId);
-    } else if (link == '/grades') {
+    if (link == '/grades') {
       // Could navigate to grades tab - handled by drawer close
     } else if (link == '/accounts') {
       // Could navigate to accounts tab

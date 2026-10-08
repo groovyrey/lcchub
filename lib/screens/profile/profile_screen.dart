@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../api/portal_api.dart';
-import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/profile_photo_editor.dart';
 
@@ -17,9 +16,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _profile;
-  List<CommunityPost> _posts = [];
   bool _isLoadingProfile = true;
-  bool _isLoadingPosts = true;
   String? _error;
   bool _photoBusy = false;
 
@@ -38,10 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       setState(() { _error = 'Could not load profile'; _isLoadingProfile = false; });
     }
-
-    final postsRes = await PortalApi.getCommunityPosts(userId: widget.userId, limit: 50);
-    if (!mounted) return;
-    setState(() { _posts = postsRes.posts; _isLoadingPosts = false; });
   }
 
   @override
@@ -66,7 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 else ...[
                   _buildProfileHeader(),
                   _buildBadgesSection(),
-                  _buildPostsSection(),
                 ],
               ],
             ),
@@ -209,8 +201,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _statColumn(PhosphorIcons.article(), '${_posts.length}', 'Posts'),
-                Container(width: 1, height: 32, color: AppColors.outline.withValues(alpha: 0.3)),
                 _statColumn(PhosphorIcons.trophy(), '${badges.length}', 'Badges'),
               ],
             ),
@@ -263,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -301,111 +291,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildPostsSection() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Community Posts', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 10),
-            if (_isLoadingPosts)
-              ...List.generate(2, (_) => Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ))
-            else if (_posts.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Icon(PhosphorIcons.chats(), size: 36, color: AppColors.outline.withValues(alpha: 0.4)),
-                    const SizedBox(height: 8),
-                    Text('No posts yet', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
-                  ],
-                ),
-              )
-            else
-              ..._posts.map((post) => _postCard(post)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _postCard(CommunityPost post) {
-    final topicColors = {
-      'Academics': Colors.blue,
-      'Campus Life': Colors.green,
-      'Career': Colors.orange,
-      'Well-Being': Colors.purple,
-      'General': Colors.blueGrey,
-    };
-    final topicColor = topicColors[post.topic] ?? AppColors.primary;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (post.topic != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: topicColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                    child: Text(post.topic!, style: GoogleFonts.poppins(fontSize: 11, color: topicColor, fontWeight: FontWeight.w500)),
-                  ),
-                const Spacer(),
-                Text(_formatTime(post.createdAt), style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(post.content, style: GoogleFonts.poppins(fontSize: 13), maxLines: 3, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(PhosphorIcons.heart(), size: 14, color: AppColors.onSurfaceVariant),
-                const SizedBox(width: 3),
-                Text('${post.likes?.length ?? 0}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
-                const SizedBox(width: 12),
-                Icon(PhosphorIcons.chatCircle(), size: 14, color: AppColors.onSurfaceVariant),
-                const SizedBox(width: 3),
-                Text('${post.commentCount}', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(dynamic createdAt) {
-    if (createdAt == null) return '';
-    try {
-      final dt = createdAt is String ? DateTime.parse(createdAt).toLocal() : DateTime.now();
-      final diff = DateTime.now().difference(dt);
-      if (diff.inSeconds < 60) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      if (diff.inDays < 7) return '${diff.inDays}d ago';
-      return '${(diff.inDays / 7).floor()}w ago';
-    } catch (_) {
-      return '';
-    }
-  }
 }
 
 class _ProfileSkeleton extends StatelessWidget {
