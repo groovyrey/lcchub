@@ -1,4 +1,4 @@
-name: Build & Publish APK Release
+name: Build & Release APK
 
 on:
   workflow_dispatch:
@@ -7,6 +7,9 @@ on:
       - main
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -19,12 +22,21 @@ env:
   FLUTTER_VERSION: '3.32.4'
 
 jobs:
-  test:
-    name: Analyze & Test
+  build:
+    name: Build arm64 APK & Publish Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -32,9 +44,28 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+          pub-cache: true
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Configure release signing
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_B64" ]; then
+            echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/lcc-upload-keystore.p12
+            chmod 600 android/lcc-upload-keystore.p12
+            printf 'storeFile=%s/android/lcc-upload-keystore.p12\n' "$PWD" > android/key.properties
+            printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_STORE_PASS" >> android/key.properties
+            printf 'keyAlias=%s\n' "$ANDROID_KEYSTORE_ALIAS" >> android/key.properties
+            printf 'keyPassword=%s\n' "$ANDROID_KEYSTORE_KEY_PASS" >> android/key.properties
+          else
+            echo "No keystore configured; falling back to debug signing"
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
+          ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}
+          ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
 
       - name: Analyze code
         run: flutter analyze --no-fatal-infos
@@ -42,84 +73,61 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  release:
-    name: Build & Publish Release
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Build APK (release, arm64 only)
+        run: flutter build apk --release --split-per-abi
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/pubspec.lock') }}
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Configure release signing
-        run: |
-            if [ -n "$ANDROID_KEYSTORE_B64" ]; then
-            echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/lcc-upload-keystore.p12
-            chmod 600 android/lcc-upload-keystore.p12
-            printf 'storeFile=%s/android/lcc-upload-keystore.p12\n' "$PWD" > android/key.properties
-            printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_STORE_PASS" >> android/key.properties
-            printf 'keyAlias=%s\n' "$ANDROID_KEYSTORE_ALIAS" >> android/key.properties
-            printf 'keyPassword=%s\n' "$ANDROID_KEYSTORE_KEY_PASS" >> android/key.properties
-            else
-            echo "No keystore configured; falling back to debug signing"
-            fi
-        env:
-            ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-            ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
-            ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}
-            ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-
-      - name: Extract version
+      - name: Name APK with app title and version
         id: version
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            TAG="${{ github.ref_name }}"
+          VERSION=$(grep '^version:' pubspec.yaml | head -1 | awk '{print $2}')
+          VERSION_CLEAN=${VERSION%+*}
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+            "dist/lcc-hub-${VERSION_CLEAN}-arm64.apk"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+            "dist/lcc-hub-${VERSION_CLEAN}-beta.apk"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME}"
           else
-            TAG="v$(grep -m1 '^version:' pubspec.yaml | sed -E 's/version: *//; s/[+].*//')"
+            TAG="v${VERSION_CLEAN}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "display=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "version_clean=${VERSION_CLEAN}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Stage APK
-        run: |
-          mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/lcc-hub-${{ steps.version.outputs.display }}.apk"
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcchub-arm64-apk
+          path: dist/lcc-hub-*-arm64.apk
 
       - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: "LCC Hub v${{ steps.version.outputs.version_clean }}"
           tag_name: ${{ steps.version.outputs.tag }}
-          name: LCC Hub v${{ steps.version.outputs.display }}
           body: |
-            Latest APK build of LCC Hub. Download and install `lcc-hub-${{ steps.version.outputs.display }}.apk` on your Android device.
-
-            - Built from branch `${{ github.ref_name }}` (commit `${{ github.sha }}`)
-          files: dist/*.apk
+            arm64 APK only (`--split-per-abi`), release-signed so it installs
+            over any previous LCC Hub build.
+          files: dist/lcc-hub-${{ steps.version.outputs.version_clean }}-arm64.apk
           generate_release_notes: true
           fail_on_unmatched_files: true
+
+      - name: Publish rolling beta pre-release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "LCC Hub Beta"
+          tag_name: beta
+          body: |
+            Rolling test build from `main`. Release-signed with the real
+            keystore, so it installs over any previous LCC Hub build.
+
+            arm64 APK only (`--split-per-abi`).
+
+            This is a pre-release for testing before the version is cut to a
+            real release.
+          files: dist/lcc-hub-${{ steps.version.outputs.version_clean }}-beta.apk
+          prerelease: true
+          generate_release_notes: true
