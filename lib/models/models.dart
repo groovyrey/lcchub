@@ -63,7 +63,7 @@ class Student {
       name: json['name'] ?? '',
       id: json['id'] ?? '',
       course: json['course'] ?? '',
-      profilePhotoUrl: json['profilePhotoUrl'] != null ? json['profilePhotoUrl'].toString() : null,
+      profilePhotoUrl: json['profilePhotoUrl']?.toString(),
       email: json['email'],
       address: json['address'],
       mobile: json['mobile'],
