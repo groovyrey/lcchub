@@ -39,6 +39,7 @@ class GradePolicy {
   static bool isPercentage(double value) => value > 5;
 
   static double toDecimal(double value) {
+    if (!isPercentage(value)) return value;
     final converted = 1 + (100 - value) / 12.5;
     return converted.clamp(1, 5).toDouble();
   }
@@ -150,11 +151,14 @@ class GradePolicy {
 
     final graded = subjects.where((grade) => !isPending(grade)).toList();
     SubjectGrade? best;
+    double? bestScore;
     for (final grade in graded) {
-      final value = decimal(grade);
+      final value = parse(grade.grade);
       if (value == null) continue;
-      if (best == null || value < decimal(best)!) {
+      final valueScore = score(value);
+      if (bestScore == null || valueScore > bestScore) {
         best = grade;
+        bestScore = valueScore;
       }
     }
 

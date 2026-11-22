@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'app_text_theme.dart';
 
 class LightColors {
-  static const primary = Color(0xFF2563EB);
-  static const primaryDark = Color(0xFF1D4ED8);
-  static const primaryLight = Color(0xFFDBEAFE);
+  static const primary = Color(0xFF0EA5E9);
+  static const onPrimary = Color(0xFF083344);
+  static const primaryDark = Color(0xFF0284C7);
+  static const primaryLight = Color(0xFFE0F2FE);
   static const secondary = Color(0xFF15803D);
   static const secondaryDark = Color(0xFF166534);
   static const background = Color(0xFFF1F5F9);
@@ -20,9 +21,9 @@ class LightColors {
 }
 
 class DarkColors {
-  static const primary = Color(0xFF60A5FA);
-  static const primaryDark = Color(0xFF2563EB);
-  static const primaryLight = Color(0xFF1E3A8A);
+  static const primary = Color(0xFF7DD3FC);
+  static const primaryDark = Color(0xFF0EA5E9);
+  static const primaryLight = Color(0xFF0C4A6E);
   static const secondary = Color(0xFF34D399);
   static const secondaryDark = Color(0xFF10B981);
   static const background = Color(0xFF0B1120);
@@ -82,7 +83,7 @@ ThemeData buildDarkTheme() => _buildTheme(Brightness.dark);
 ThemeData _buildTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   final colors = isDark ? DarkColors.primary : LightColors.primary;
-  final onPrimary = isDark ? DarkColors.background : Colors.white;
+  final onPrimary = isDark ? DarkColors.background : LightColors.onPrimary;
   final surface = isDark ? DarkColors.surface : LightColors.surface;
   final onSurface = isDark ? DarkColors.onSurface : LightColors.onSurface;
   final onSurfaceVariant = isDark ? DarkColors.onSurfaceVariant : LightColors.onSurfaceVariant;

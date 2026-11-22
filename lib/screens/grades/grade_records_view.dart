@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
-import '../../theme/grade_policy.dart';
+import 'grade_table.dart';
 
 class SemesterOption {
   final String label;
@@ -141,48 +141,24 @@ class _GradeRecordsViewState extends State<GradeRecordsView> {
               ? const Center(child: CircularProgressIndicator())
               : grades.isEmpty
                   ? const Center(child: Text('No grade records yet.'))
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-                      scrollDirection: Axis.horizontal,
-                      child: _GradeTable(grades: grades),
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final availableWidth = constraints.maxWidth - 32;
+                        final tableWidth = availableWidth > 620 ? availableWidth : 620.0;
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                          scrollDirection: Axis.horizontal,
+                          child: SingleChildScrollView(
+                            child: SizedBox(
+                              width: tableWidth,
+                              child: GradeTable(grades: grades),
+                            ),
+                          ),
+                        );
+                      },
                     ),
         ),
       ],
-    );
-  }
-}
-
-class _GradeTable extends StatelessWidget {
-  final List<SubjectGrade> grades;
-
-  const _GradeTable({required this.grades});
-
-  @override
-  Widget build(BuildContext context) {
-    final headerStyle = Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600);
-    return DataTable(
-      headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
-      headingTextStyle: headerStyle,
-      dataTextStyle: Theme.of(context).textTheme.bodySmall,
-      columns: const [
-        DataColumn(label: Text('Subject')),
-        DataColumn(label: Text('Code')),
-        DataColumn(label: Text('Section')),
-        DataColumn(label: Text('Grade')),
-        DataColumn(label: Text('Status')),
-      ],
-      rows: grades.map((grade) {
-        final pending = GradePolicy.isPending(grade);
-        final gradeText = pending ? 'No grade yet' : grade.grade;
-        final statusText = pending ? 'Pending' : (grade.remarks.isNotEmpty ? grade.remarks : 'Recorded');
-        return DataRow(cells: [
-          DataCell(Text(grade.description, maxLines: 1, overflow: TextOverflow.ellipsis)),
-          DataCell(Text(grade.code.isEmpty ? 'N/A' : grade.code)),
-          DataCell(Text(grade.section ?? '---')),
-          DataCell(Text(gradeText)),
-          DataCell(Text(statusText, style: TextStyle(color: pending ? AppColors.onSurfaceVariant : AppColors.success))),
-        ]);
-      }).toList(),
     );
   }
 }
