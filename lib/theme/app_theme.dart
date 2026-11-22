@@ -1,156 +1,192 @@
 import 'package:flutter/material.dart';
+import 'app_text_theme.dart';
+
+class LightColors {
+  static const primary = Color(0xFF2563EB);
+  static const primaryDark = Color(0xFF1D4ED8);
+  static const primaryLight = Color(0xFFDBEAFE);
+  static const secondary = Color(0xFF15803D);
+  static const secondaryDark = Color(0xFF166534);
+  static const background = Color(0xFFF1F5F9);
+  static const surface = Color(0xFFFFFFFF);
+  static const onSurface = Color(0xFF101828);
+  static const onSurfaceVariant = Color(0xFF64748B);
+  static const outline = Color(0xFFE2E8F0);
+  static const cardBorder = Color(0xFFE2E8F0);
+  static const error = Color(0xFFDC2626);
+  static const warning = Color(0xFFB45309);
+  static const success = Color(0xFF15803D);
+  static const surfaceVariant = Color(0xFFF8FAFC);
+}
+
+class DarkColors {
+  static const primary = Color(0xFF60A5FA);
+  static const primaryDark = Color(0xFF2563EB);
+  static const primaryLight = Color(0xFF1E3A8A);
+  static const secondary = Color(0xFF34D399);
+  static const secondaryDark = Color(0xFF10B981);
+  static const background = Color(0xFF0B1120);
+  static const surface = Color(0xFF111827);
+  static const onSurface = Color(0xFFE5E7EB);
+  static const onSurfaceVariant = Color(0xFF94A3B8);
+  static const outline = Color(0xFF334155);
+  static const cardBorder = Color(0xFF334155);
+  static const error = Color(0xFFF87171);
+  static const warning = Color(0xFFFBBF24);
+  static const success = Color(0xFF4ADE80);
+  static const surfaceVariant = Color(0xFF1E293B);
+}
 
 class AppColors {
   AppColors._();
 
-  // ── Light theme base values ───────────────────────────────────────
-  static const _lPrimary       = Color(0xFF6C5CE7);
-  static const _lPrimaryDark   = Color(0xFF5A4BD1);
-  static const _lPrimaryLight  = Color(0xFFA29BFE);
-  static const _lSecondary     = Color(0xFF00B894);
-  static const _lSecondaryDark = Color(0xFF00A381);
-  static const _lBackground    = Color(0xFFF5F6FA);
-  static const _lSurface       = Color(0xFFFFFFFF);
-  static const _lOnSurface     = Color(0xFF1A1D26);
-  static const _lOnSurfaceVar  = Color(0xFF6B7280);
-  static const _lOutline       = Color(0xFFE5E7EB);
-  static const _lError         = Color(0xFFEF4444);
-  static const _lWarning       = Color(0xFFF59E0B);
-  static const _lSuccess       = Color(0xFF10B981);
-  static const _lSurfaceVar    = Color(0xFFF0F1F5);
-  static const _lCardBorder    = Color(0xFFE8E9EE);
-
-  // ── Theme-independent (same in both modes) ─────────────────────────
-  static const topicAcademics  = Color(0xFF6C5CE7);
-  static const topicCampusLife = Color(0xFF00B894);
-  static const topicCareer     = Color(0xFFEF4444);
-  static const topicWellBeing  = Color(0xFFF59E0B);
-  static const topicGeneral    = Color(0xFF6B7280);
-
-  static const gradientStart    = Color(0xFF6C5CE7);
-  static const gradientEnd      = Color(0xFFA29BFE);
-  static const gradientSecondary = Color(0xFF00B894);
-  static const gradientWarm     = Color(0xFFF59E0B);
-
-  // ── Runtime brightness flag ────────────────────────────────────────
   static bool _isDark = false;
 
-  /// Call whenever the resolved brightness changes.
-  static void setThemeBrightness(Brightness b) =>
-      _isDark = b == Brightness.dark;
+  static void setThemeBrightness(Brightness brightness) =>
+      _isDark = brightness == Brightness.dark;
 
-  // ── Theme-aware getters ────────────────────────────────────────────
-  static Color get primary       => _isDark ? DarkColors.primary       : _lPrimary;
-  static Color get primaryDark   => _isDark ? DarkColors.primaryDark   : _lPrimaryDark;
-  static Color get primaryLight  => _isDark ? DarkColors.primaryLight  : _lPrimaryLight;
-  static Color get secondary     => _isDark ? DarkColors.secondary     : _lSecondary;
-  static Color get secondaryDark => _isDark ? DarkColors.secondaryDark : _lSecondaryDark;
-  static Color get background    => _isDark ? DarkColors.background    : _lBackground;
-  static Color get surface       => _isDark ? DarkColors.surface       : _lSurface;
-  static Color get onSurface     => _isDark ? DarkColors.onSurface     : _lOnSurface;
-  static Color get onSurfaceVariant => _isDark ? DarkColors.onSurfaceVariant : _lOnSurfaceVar;
-  static Color get outline       => _isDark ? DarkColors.outline       : _lOutline;
-  static Color get error         => _isDark ? DarkColors.error         : _lError;
-  static Color get warning       => _isDark ? DarkColors.warning       : _lWarning;
-  static Color get success       => _isDark ? DarkColors.success       : _lSuccess;
-  static Color get surfaceVariant => _isDark ? DarkColors.surfaceVariant : _lSurfaceVar;
-  static Color get cardBorder    => _isDark ? DarkColors.cardBorder    : _lCardBorder;
+  static Color get primary => _isDark ? DarkColors.primary : LightColors.primary;
+  static Color get primaryDark => _isDark ? DarkColors.primaryDark : LightColors.primaryDark;
+  static Color get primaryLight => _isDark ? DarkColors.primaryLight : LightColors.primaryLight;
+  static Color get secondary => _isDark ? DarkColors.secondary : LightColors.secondary;
+  static Color get secondaryDark => _isDark ? DarkColors.secondaryDark : LightColors.secondaryDark;
+  static Color get background => _isDark ? DarkColors.background : LightColors.background;
+  static Color get surface => _isDark ? DarkColors.surface : LightColors.surface;
+  static Color get onSurface => _isDark ? DarkColors.onSurface : LightColors.onSurface;
+  static Color get onSurfaceVariant =>
+      _isDark ? DarkColors.onSurfaceVariant : LightColors.onSurfaceVariant;
+  static Color get outline => _isDark ? DarkColors.outline : LightColors.outline;
+  static Color get cardBorder => _isDark ? DarkColors.cardBorder : LightColors.cardBorder;
+  static Color get error => _isDark ? DarkColors.error : LightColors.error;
+  static Color get warning => _isDark ? DarkColors.warning : LightColors.warning;
+  static Color get success => _isDark ? DarkColors.success : LightColors.success;
+  static Color get surfaceVariant =>
+      _isDark ? DarkColors.surfaceVariant : LightColors.surfaceVariant;
+
+  static const topicAcademics = LightColors.primary;
+  static const topicCampusLife = LightColors.success;
+  static const topicCareer = LightColors.error;
+  static const topicWellBeing = LightColors.warning;
+  static const topicGeneral = LightColors.onSurfaceVariant;
+
+  static const gradientStart = LightColors.primary;
+  static const gradientEnd = LightColors.primaryDark;
+  static const gradientSecondary = LightColors.success;
+  static const gradientWarm = LightColors.warning;
 }
 
-class DarkColors {
-  DarkColors._();
+ThemeData buildAppTheme() => _buildTheme(Brightness.light);
 
-  static const primary       = Color(0xFFA29BFE);
-  static const primaryDark   = Color(0xFF6C5CE7);
-  static const primaryLight  = Color(0xFFD6CCFF);
-  static const secondary     = Color(0xFF00E6B8);
-  static const secondaryDark = Color(0xFF00B894);
-  static const background    = Color(0xFF0F1117);
-  static const surface       = Color(0xFF1A1D2E);
-  static const onSurface     = Color(0xFFE8E9EE);
-  static const onSurfaceVariant = Color(0xFF9CA3AF);
-  static const outline       = Color(0xFF2D3142);
-  static const error         = Color(0xFFF87171);
-  static const warning       = Color(0xFFFBBF24);
-  static const success       = Color(0xFF34D399);
-  static const surfaceVariant = Color(0xFF232738);
-  static const cardBorder    = Color(0xFF2D3142);
-}
+ThemeData buildDarkTheme() => _buildTheme(Brightness.dark);
 
-// ── Theme builders ──────────────────────────────────────────────────
+ThemeData _buildTheme(Brightness brightness) {
+  final isDark = brightness == Brightness.dark;
+  final colors = isDark ? DarkColors.primary : LightColors.primary;
+  final onPrimary = isDark ? DarkColors.background : Colors.white;
+  final surface = isDark ? DarkColors.surface : LightColors.surface;
+  final onSurface = isDark ? DarkColors.onSurface : LightColors.onSurface;
+  final onSurfaceVariant = isDark ? DarkColors.onSurfaceVariant : LightColors.onSurfaceVariant;
+  final outline = isDark ? DarkColors.outline : LightColors.outline;
+  final surfaceVariant = isDark ? DarkColors.surfaceVariant : LightColors.surfaceVariant;
+  final primaryLight = isDark ? DarkColors.primaryLight : LightColors.primaryLight;
+  final secondary = isDark ? DarkColors.secondary : LightColors.secondary;
+  final error = isDark ? DarkColors.error : LightColors.error;
+  final warning = isDark ? DarkColors.warning : LightColors.warning;
 
-ThemeData buildAppTheme() {
-  return ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    colorScheme: ColorScheme.light(
-      primary: AppColors._lPrimary,
-      onPrimary: AppColors._lSurface,
-      primaryContainer: AppColors._lPrimaryLight.withValues(alpha: 0.15),
-      onPrimaryContainer: AppColors._lPrimaryDark,
-      secondary: AppColors._lSecondary,
-      onSecondary: AppColors._lSurface,
-      secondaryContainer: AppColors._lSecondary.withValues(alpha: 0.12),
-      onSecondaryContainer: AppColors._lSecondaryDark,
-      tertiary: AppColors._lWarning,
-      surface: AppColors._lSurface,
-      onSurface: AppColors._lOnSurface,
-      surfaceContainerHighest: AppColors._lSurfaceVar,
-      onSurfaceVariant: AppColors._lOnSurfaceVar,
-      outline: AppColors._lOutline,
-      error: AppColors._lError,
-      onError: AppColors._lSurface,
-    ),
-    scaffoldBackgroundColor: AppColors._lBackground,
-    cardTheme: CardThemeData(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: AppColors._lSurface,
-      foregroundColor: AppColors._lOnSurface,
-      elevation: 0,
-    ),
-    dividerTheme: DividerThemeData(color: AppColors._lOutline, thickness: 0.5),
+  final colorScheme = isDark
+      ? ColorScheme.dark(
+          primary: colors,
+          onPrimary: onPrimary,
+          primaryContainer: primaryLight,
+          onPrimaryContainer: DarkColors.primary,
+          secondary: secondary,
+          onSecondary: DarkColors.background,
+          secondaryContainer: DarkColors.secondaryDark.withValues(alpha: 0.18),
+          onSecondaryContainer: DarkColors.secondary,
+          tertiary: warning,
+          surface: surface,
+          onSurface: onSurface,
+          surfaceContainerHighest: surfaceVariant,
+          onSurfaceVariant: onSurfaceVariant,
+          outline: outline,
+          error: error,
+          onError: DarkColors.background,
+        )
+      : ColorScheme.light(
+          primary: colors,
+          onPrimary: onPrimary,
+          primaryContainer: primaryLight,
+          onPrimaryContainer: LightColors.primaryDark,
+          secondary: secondary,
+          onSecondary: Colors.white,
+          secondaryContainer: LightColors.success.withValues(alpha: 0.12),
+          onSecondaryContainer: LightColors.secondaryDark,
+          tertiary: warning,
+          surface: surface,
+          onSurface: onSurface,
+          surfaceContainerHighest: surfaceVariant,
+          onSurfaceVariant: onSurfaceVariant,
+          outline: outline,
+          error: error,
+          onError: Colors.white,
+        );
+
+  final border = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: BorderSide(color: outline),
   );
-}
 
-ThemeData buildDarkTheme() {
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.dark(
-      primary: DarkColors.primary,
-      onPrimary: DarkColors.surface,
-      primaryContainer: DarkColors.primaryLight.withValues(alpha: 0.15),
-      onPrimaryContainer: DarkColors.primary,
-      secondary: DarkColors.secondary,
-      onSecondary: DarkColors.surface,
-      secondaryContainer: DarkColors.secondary.withValues(alpha: 0.12),
-      onSecondaryContainer: DarkColors.secondaryDark,
-      tertiary: DarkColors.warning,
-      surface: DarkColors.surface,
-      onSurface: DarkColors.onSurface,
-      surfaceContainerHighest: DarkColors.surfaceVariant,
-      onSurfaceVariant: DarkColors.onSurfaceVariant,
-      outline: DarkColors.outline,
-      error: DarkColors.error,
-      onError: DarkColors.surface,
-    ),
-    scaffoldBackgroundColor: DarkColors.background,
+    brightness: brightness,
+    colorScheme: colorScheme,
+    scaffoldBackgroundColor: isDark ? DarkColors.background : LightColors.background,
+    textTheme: buildAppTextTheme(isDark ? DarkColors.onSurface : LightColors.onSurface),
     cardTheme: CardThemeData(
       elevation: 0,
-      color: DarkColors.surface,
+      color: surface,
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: DarkColors.outline.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: outline),
       ),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: DarkColors.surface,
-      foregroundColor: DarkColors.onSurface,
+      backgroundColor: surface,
+      foregroundColor: onSurface,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+    ),
+    dividerTheme: DividerThemeData(color: outline, thickness: 1, space: 1),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: surfaceVariant,
+      border: border,
+      enabledBorder: border,
+      focusedBorder: border.copyWith(borderSide: BorderSide(color: colors, width: 1.5)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: surface,
+      selectedItemColor: colors,
+      unselectedItemColor: onSurfaceVariant,
       elevation: 0,
     ),
-    dividerTheme: DividerThemeData(color: DarkColors.outline, thickness: 0.5),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: colors,
+        foregroundColor: onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors,
+        side: BorderSide(color: outline),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+    visualDensity: VisualDensity.compact,
   );
 }

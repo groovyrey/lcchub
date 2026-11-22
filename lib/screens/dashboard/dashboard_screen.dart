@@ -55,7 +55,7 @@ class DashboardScreen extends StatelessWidget {
                   backgroundColor: Colors.white.withValues(alpha: 0.25),
                   child: Text(
                     s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
-                    style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -63,10 +63,10 @@ class DashboardScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(s.name, style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
-                      Text('ID: ${s.id}', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
+                      Text(s.name, style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('ID: ${s.id}', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
                       if (s.course.isNotEmpty)
-                        Text(s.course, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
+                        Text(s.course, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
                     ],
                   ),
                 ),
@@ -74,7 +74,7 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Quick Info', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+          Text('Quick Info', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -93,7 +93,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           if (s.schedule != null && s.schedule!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Text('Today\'s Classes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+            Text('Today\'s Classes', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
             const SizedBox(height: 8),
             ...NotificationService.getTodayClasses(s.schedule!).isEmpty
                 ? [Container(
@@ -101,16 +101,16 @@ class DashboardScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
                     ),
-                    child: Text('No classes today', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
+                    child: Text('No classes today', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurfaceVariant)),
                   )]
                 : NotificationService.getTodayClasses(s.schedule!).map((item) => _scheduleTile(item)),
           ],
           if (s.financials != null) ...[
             const SizedBox(height: 16),
-            Text('Financial Summary', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+            Text('Financial Summary', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
             const SizedBox(height: 8),
             _financialTile('Total', s.financials!.total),
             _financialTile('Balance', s.financials!.balance),
@@ -129,7 +129,7 @@ class DashboardScreen extends StatelessWidget {
           children: [
             Icon(PhosphorIcons.calendarX(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
-            Text('No schedule available', style: GoogleFonts.poppins(fontSize: 16, color: AppColors.onSurfaceVariant)),
+            Text('No schedule available', style: GoogleFonts.plusJakartaSans(fontSize: 16, color: AppColors.onSurfaceVariant)),
           ],
         ),
       );
@@ -143,7 +143,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: child,
@@ -155,7 +155,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -163,8 +163,8 @@ class DashboardScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(height: 8),
-          Text(value, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
-          Text(label, style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
+          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
         ],
       ),
     );
@@ -176,7 +176,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
       ),
       child: Row(
@@ -190,8 +190,8 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.subject, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(item.time.isNotEmpty ? item.time : 'TBA', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                Text(item.subject, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(item.time.isNotEmpty ? item.time : 'TBA', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
               ],
             ),
           ),
@@ -199,7 +199,7 @@ class DashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-              child: Text(item.room, style: GoogleFonts.poppins(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
+              child: Text(item.room, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
             ),
         ],
       ),
@@ -212,14 +212,14 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 14, color: AppColors.onSurfaceVariant)),
-          Text(value, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 14, color: AppColors.onSurfaceVariant)),
+          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
         ],
       ),
     );

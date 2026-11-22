@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
@@ -323,104 +322,39 @@ class PortalApi {
     }
   }
 
-  static Stream<String> chatStream(List<Map<String, String>> messages) async* {
-    final request = http.Request('POST', Uri.parse('$_baseUrl/api/ai/assistant'));
-    request.headers.addAll(_headers());
-    request.headers['Content-Type'] = 'application/json';
-    request.body = jsonEncode({'messages': messages});
-
-    final streamedResponse = await http.Client().send(request);
-    _updateCookies(http.Response('', streamedResponse.statusCode, headers: streamedResponse.headers));
-
-    final pending = StringBuffer();
-    final content = StringBuffer();
-    var yieldedLen = 0;
-    var inThought = false;
-
-    await for (final chunk in streamedResponse.stream.transform(utf8.decoder)) {
-      pending.write(chunk);
-      var text = pending.toString();
-      var nl = text.indexOf('\n');
-      while (nl >= 0) {
-        final line = text.substring(0, nl);
-        text = text.substring(nl + 1);
-        pending.clear();
-        pending.write(text);
-
-        final trimmed = line.trim();
-        if (trimmed.startsWith('STATUS:') || trimmed.startsWith('TOOL_USED:')) {
-          yield trimmed;
-        } else {
-          final res = _cleanLine(line, inThought);
-          inThought = res.inThought;
-          if (res.keep) {
-            content.write(res.text);
-            content.write('\n');
-            yield* _yieldDelta(content, yieldedLen, (p) => yieldedLen = p);
-          }
-        }
-        text = pending.toString();
-        nl = text.indexOf('\n');
+  static Future<Map<String, dynamic>> syncGrades(List<ReportLink> reports) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/student/grades'),
+        headers: _headers(),
+        body: jsonEncode({
+          'refresh': true,
+          'reports': reports
+              .map((report) => {'href': report.href, 'reportName': report.text})
+              .toList(),
+        }),
+      );
+      _updateCookies(response);
+      final data = jsonDecode(response.body);
+      if (data['success'] != true) {
+        return {'success': false, 'error': data['error']};
       }
-    }
 
-    if (pending.isNotEmpty) {
-      final res = _cleanLine(pending.toString(), inThought);
-      inThought = res.inThought;
-      if (res.keep && res.text.isNotEmpty) {
-        content.write(res.text);
-        yield* _yieldDelta(content, yieldedLen, (p) => yieldedLen = p);
+      final grades = <String, List<SubjectGrade>>{};
+      for (final entry in data['reports'] ?? const []) {
+        final reportName = entry['report']?.toString() ?? '';
+        final matching = reports.where((report) => report.text == reportName);
+        final href = matching.isNotEmpty ? matching.first.href : reportName;
+        grades[href] = (entry['subjects'] as List?)
+                ?.map((subject) => SubjectGrade.fromJson(
+                      Map<String, dynamic>.from(subject as Map)..['semester'] = reportName,
+                    ))
+                .toList() ??
+            const <SubjectGrade>[];
       }
+      return {'success': true, 'grades': grades};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
     }
   }
-
-  static Stream<String> _yieldDelta(
-      StringBuffer content, int yieldedLen, void Function(int) setLen) async* {
-    final full = content.toString();
-    if (full.length > yieldedLen) {
-      final newPart = full.substring(yieldedLen);
-      setLen(full.length);
-      yield newPart;
-    }
-  }
-
-  static bool _isThoughtClose(String text, Match m) =>
-      text.codeUnitAt(m.start + 1) == 47;
-
-  static ({String text, bool keep, bool inThought}) _cleanLine(
-      String text, bool inThought) {
-    final out = StringBuffer();
-    var idx = 0;
-    var inThought0 = inThought;
-
-    for (final m in _thoughtTag.allMatches(text)) {
-      if (inThought0) {
-        if (_isThoughtClose(text, m)) {
-          idx = m.end;
-          inThought0 = false;
-        } else {
-          idx = m.end;
-        }
-      } else if (_isThoughtClose(text, m)) {
-        out.write(text.substring(idx, m.start));
-        idx = m.end;
-      } else {
-        out.write(text.substring(idx, m.start));
-        idx = m.end;
-        inThought0 = true;
-      }
-    }
-
-    if (!inThought0) {
-      out.write(text.substring(idx));
-    }
-
-    final emit = out.toString().replaceAll(_controlMarker, '');
-    final keep = emit.isNotEmpty || (text.trim().isEmpty && !inThought0);
-    return (text: emit, keep: keep, inThought: inThought0);
-  }
-
-  static final _thoughtTag =
-      RegExp(r'<(?:/)?(?:thought|thinking|reasoning|think)>', caseSensitive: false);
-  static final _controlMarker = RegExp(r'(?:STATUS|TOOL_USED):[^\n]*');
 }

@@ -85,7 +85,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
               decoration: BoxDecoration(color: AppColors.surface),
               child: Row(
                 children: [
-                  Text('Notifications', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('Notifications', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold)),
                   const Spacer(),
                   if (allNotifs.isNotEmpty) ...[
                     if (_selectedTab == 0 && unreadCount > 0)
@@ -94,14 +94,14 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                           final confirm = await _showConfirmDialog('Mark all as read?');
                           if (confirm) state.markAllNotifsRead();
                         },
-                        child: Text('Mark all read', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.primary)),
+                        child: Text('Mark all read', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.primary)),
                       ),
                     TextButton(
                       onPressed: () async {
                         final confirm = await _showConfirmDialog('Clear all notifications?', destructive: true);
                         if (confirm) state.clearAllNotifs();
                       },
-                      child: Text('Clear all', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.error)),
+                      child: Text('Clear all', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.error)),
                     ),
                   ],
                   IconButton(
@@ -153,7 +153,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(label, style: GoogleFonts.poppins(
+              Text(label, style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected ? AppColors.primary : AppColors.onSurfaceVariant,
@@ -163,7 +163,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
-                  child: Text(count > 99 ? '99+' : '$count', style: GoogleFonts.poppins(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w600)),
+                  child: Text(count > 99 ? '99+' : '$count', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
               ],
             ],
@@ -195,7 +195,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: notif.isRead ? AppColors.surface : AppColors.primary.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: notif.isRead ? AppColors.outline.withValues(alpha: 0.4) : color.withValues(alpha: 0.2)),
           ),
           child: Row(
@@ -220,23 +220,23 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                             decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                           ),
                         Expanded(
-                          child: Text(notif.title, style: GoogleFonts.poppins(
+                          child: Text(notif.title, style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: notif.isRead ? FontWeight.w500 : FontWeight.w600,
                             color: notif.isRead ? AppColors.onSurface : AppColors.primary,
                           )),
                         ),
-                        Text(_timeAgo(notif.createdAt), style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                        Text(_timeAgo(notif.createdAt), style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(notif.message, maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
                     if (notif.link != null) ...[
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () => _showFullNotif(notif),
-                        child: Text('View Details', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
+                        child: Text('View Details', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
                       ),
                     ],
                   ],
@@ -269,7 +269,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
               children: [
                 Container(
                   width: 44, height: 44,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
                   child: Icon(_typeIcon(notif.type), color: color, size: 24),
                 ),
                 const SizedBox(width: 14),
@@ -277,15 +277,15 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(notif.title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text(_timeAgo(notif.createdAt), style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                      Text(notif.title, style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(_timeAgo(notif.createdAt), style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text(notif.message, style: GoogleFonts.poppins(fontSize: 14, height: 1.5)),
+            Text(notif.message, style: GoogleFonts.plusJakartaSans(fontSize: 14, height: 1.5)),
             const SizedBox(height: 20),
             if (notif.link != null)
               SizedBox(
@@ -296,8 +296,8 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                     Navigator.pop(context);
                     _navigateToLink(notif.link!);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                  child: Text('View Details', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  child: Text('View Details', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
                 ),
               )
             else
@@ -305,8 +305,8 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                  child: Text('Close', style: GoogleFonts.poppins()),
+                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  child: Text('Close', style: GoogleFonts.plusJakartaSans()),
                 ),
               ),
             const SizedBox(height: 8),
@@ -328,13 +328,13 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
     return await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Confirm', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        content: Text(message, style: GoogleFonts.poppins()),
+        title: Text('Confirm', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+        content: Text(message, style: GoogleFonts.plusJakartaSans()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: GoogleFonts.poppins())),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: GoogleFonts.plusJakartaSans())),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Confirm', style: GoogleFonts.poppins(color: destructive ? AppColors.error : AppColors.primary, fontWeight: FontWeight.w600)),
+            child: Text('Confirm', style: GoogleFonts.plusJakartaSans(color: destructive ? AppColors.error : AppColors.primary, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -348,7 +348,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
       itemBuilder: (_, __) => Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8)),
         child: Row(
           children: [
             Container(width: 36, height: 36, decoration: BoxDecoration(color: AppColors.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(10))),
@@ -378,10 +378,10 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
             size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           Text(hasReadAll ? 'All caught up!' : 'No notifications',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+            style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
           const SizedBox(height: 4),
           Text(hasReadAll ? 'Check the All tab' : 'You\'re all clear',
-            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant.withValues(alpha: 0.7))),
+            style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurfaceVariant.withValues(alpha: 0.7))),
         ],
       ),
     );

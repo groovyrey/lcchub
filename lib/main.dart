@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'theme/app_theme.dart';
+import 'theme/grade_policy.dart';
 import 'models/models.dart';
 import 'api/portal_api.dart';
 import 'services/session_storage.dart';
@@ -19,7 +20,6 @@ import 'screens/grades/grades_screen.dart';
 import 'screens/accounts/accounts_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/about/about_screen.dart';
-import 'screens/assistant/assistant_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'widgets/notification_drawer.dart';
 import 'widgets/profile_photo_editor.dart';
@@ -195,7 +195,7 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
                 },
                 child: Text(
                   'LCC Hub',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -232,11 +232,11 @@ class _AnimatedSplashState extends State<AnimatedSplash> with TickerProviderStat
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
-  static const _screens = ['dashboard', 'grades', 'accounts', 'assistant', 'settings', 'about'];
-  static const _labels = ['Home', 'Grades', 'Accounts', 'Assistant', 'Settings', 'About'];
+  static const _screens = ['dashboard', 'grades', 'accounts', 'settings', 'about'];
+  static const _labels = ['Home', 'Grades', 'Accounts', 'Settings', 'About'];
   static final _icons = [
     PhosphorIcons.house(), PhosphorIcons.exam(), PhosphorIcons.receipt(),
-    PhosphorIcons.robot(PhosphorIconsStyle.fill), PhosphorIcons.gearSix(), PhosphorIcons.info(),
+    PhosphorIcons.gearSix(), PhosphorIcons.info(),
   ];
 
   @override
@@ -265,26 +265,26 @@ class _AppShellState extends State<AppShell> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Row(
           children: [
             Icon(PhosphorIcons.download(), color: AppColors.primary),
             const SizedBox(width: 8),
-            Text('Update Available', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            Text('Update Available', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Version ${info.latestVersion} is available.', style: GoogleFonts.poppins(fontSize: 14)),
+            Text('Version ${info.latestVersion} is available.', style: GoogleFonts.plusJakartaSans(fontSize: 14)),
             const SizedBox(height: 4),
-            Text('You are on v${info.currentVersion}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+            Text('You are on v${info.currentVersion}', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
             if (info.changelog.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text('What\'s New:', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+              Text('What\'s New:', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(info.changelog, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant), maxLines: 6, overflow: TextOverflow.ellipsis),
+              Text(info.changelog, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant), maxLines: 6, overflow: TextOverflow.ellipsis),
             ],
           ],
         ),
@@ -294,7 +294,7 @@ class _AppShellState extends State<AppShell> {
               context.read<AppState>().dismissUpdate();
               Navigator.pop(ctx);
             },
-            child: Text('Later', style: GoogleFonts.poppins()),
+            child: Text('Later', style: GoogleFonts.plusJakartaSans()),
           ),
           FilledButton(
             onPressed: () async {
@@ -305,7 +305,7 @@ class _AppShellState extends State<AppShell> {
                 Navigator.pop(ctx);
               }
             },
-            child: Text('Download', style: GoogleFonts.poppins()),
+            child: Text('Download', style: GoogleFonts.plusJakartaSans()),
           ),
         ],
       ),
@@ -358,7 +358,7 @@ class _AppScaffoldState extends State<AppScaffold> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.labels[_currentIndex], style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text(widget.labels[_currentIndex], style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
         leading: IconButton(
           icon: Icon(PhosphorIcons.list()),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -380,8 +380,8 @@ class _AppScaffoldState extends State<AppScaffold> {
                 children: [
                   Icon(PhosphorIcons.warningCircle(), size: 14, color: AppColors.warning),
                   const SizedBox(width: 8),
-                  Text('No connection — showing cached data',
-                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500)),
+                  Text('No connection, showing cached data',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -438,12 +438,12 @@ class _AppScaffoldState extends State<AppScaffold> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Text('LCC Hub', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text('LCC Hub', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                   const SizedBox(height: 4),
-                  Text(state.student?.name ?? '', style: GoogleFonts.poppins(fontSize: 14, color: Colors.white.withValues(alpha: 0.85))),
-                  Text('ID: ${state.student?.id ?? ''}', style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
+                  Text(state.student?.name ?? '', style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.white.withValues(alpha: 0.85))),
+                  Text('ID: ${state.student?.id ?? ''}', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
                   const SizedBox(height: 4),
-                  Text('View Profile \u2192', style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
+                  Text('View Profile \u2192', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -456,7 +456,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                 final selected = _currentIndex == index;
                 return ListTile(
                   leading: Icon(widget.icons[index], color: selected ? AppColors.primary : AppColors.onSurfaceVariant),
-                  title: Text(widget.labels[index], style: GoogleFonts.poppins(
+                  title: Text(widget.labels[index], style: GoogleFonts.plusJakartaSans(
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     color: selected ? AppColors.primary : AppColors.onSurface,
                   )),
@@ -483,21 +483,15 @@ class _AppScaffoldState extends State<AppScaffold> {
     return switch (widget.screens[_currentIndex]) {
       'dashboard' => DashboardScreen(student: state.student, onRefresh: () => state.refreshStudent()),
       'grades' => GradesScreen(
+        student: state.student,
         reports: state.student?.availableReports ?? [],
         loadedGrades: state.loadedGrades,
         loadingSemesterHref: state.loadingSemesterHref,
+        isSyncing: state.isSyncingGrades,
         onSemesterClick: (r) => state.loadGrades(r),
+        onSync: () => state.syncGrades(),
       ),
       'accounts' => AccountsScreen(financials: state.student?.financials, onRefresh: () => state.refreshStudent()),
-      'assistant' => AssistantScreen(
-        messages: state.chatMessages,
-        isGenerating: state.isGenerating,
-        error: state.chatError,
-        studentName: state.student?.name,
-        onSendMessage: (m) => state.sendMessage(m),
-        onStop: () => state.stopGeneration(),
-        onClearChat: () => state.clearChat(),
-      ),
       'settings' => SettingsScreen(
         student: state.student,
         notificationsEnabled: state.remindersEnabled,
@@ -528,16 +522,13 @@ class AppState extends ChangeNotifier {
   List<ReportLink> _reports = [];
   Map<String, List<SubjectGrade>> _loadedGrades = {};
   String? _loadingSemesterHref;
+  bool _isSyncingGrades = false;
 
   bool _isOffline = false;
   DateTime? _lastDataUpdate;
   final _offlineService = OfflineService();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
-  List<ChatMessage> _chatMessages = [];
-  bool _isGenerating = false;
-  String? _chatError;
-  StreamSubscription<String>? _chatSubscription;
   Timer? _dataRefreshTimer;
   Timer? _notifPollTimer;
 
@@ -556,9 +547,7 @@ class AppState extends ChangeNotifier {
   List<ReportLink> get reports => _reports;
   Map<String, List<SubjectGrade>> get loadedGrades => _loadedGrades;
   String? get loadingSemesterHref => _loadingSemesterHref;
-  List<ChatMessage> get chatMessages => _chatMessages;
-  bool get isGenerating => _isGenerating;
-  String? get chatError => _chatError;
+  bool get isSyncingGrades => _isSyncingGrades;
   List<AppNotification> get notifications => _notifications;
   bool get isNotifLoading => _isNotifLoading;
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
@@ -660,7 +649,7 @@ class AppState extends ChangeNotifier {
     _student = null;
     _reports = [];
     _loadedGrades = {};
-    _chatMessages = [];
+    _isSyncingGrades = false;
     _notifications = [];
     _remindersScheduled = false;
     _notifPollTimer?.cancel();
@@ -686,66 +675,26 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  void sendMessage(String content) {
-    _chatMessages = [..._chatMessages, ChatMessage(id: DateTime.now().millisecondsSinceEpoch.toString(), role: 'user', content: content)];
-    _isGenerating = true;
-    _chatError = null;
+  Future<void> syncGrades() async {
+    if (_isSyncingGrades) return;
+    final reports = _student?.availableReports ?? _reports;
+    if (reports.isEmpty) return;
+    _isSyncingGrades = true;
     notifyListeners();
-
-    final assistantMsg = ChatMessage(
-      id: 'assistant_${DateTime.now().millisecondsSinceEpoch}',
-      role: 'assistant',
-      content: '',
-      status: 'Thinking...',
-    );
-    _chatMessages = [..._chatMessages, assistantMsg];
-    notifyListeners();
-
-    final messages = _chatMessages.where((m) => m.role == 'user' || (m.role == 'assistant' && m.content.isNotEmpty)).map((m) => {
-      'role': m.role,
-      'content': m.content,
-    }).toList();
-
-    final buffer = StringBuffer();
-    _chatSubscription = PortalApi.chatStream(messages).listen(
-      (chunk) {
-        if (chunk.startsWith('STATUS:')) {
-          final status = chunk.substring(7);
-          _chatMessages = _chatMessages.map((m) =>
-            m.id == assistantMsg.id ? m.copyWith(status: status) : m
-          ).toList();
-        } else if (chunk.startsWith('TOOL_USED:')) {
-          // ignore tool used for now
-        } else {
-          buffer.write(chunk);
-          _chatMessages = _chatMessages.map((m) =>
-            m.id == assistantMsg.id ? m.copyWith(content: buffer.toString()) : m
-          ).toList();
-        }
-        notifyListeners();
-      },
-      onDone: () {
-        _isGenerating = false;
-        notifyListeners();
-      },
-      onError: (e) {
-        _isGenerating = false;
-        _chatError = e.toString();
-        notifyListeners();
-      },
-    );
-  }
-
-  void stopGeneration() {
-    _chatSubscription?.cancel();
-    _isGenerating = false;
-    notifyListeners();
-  }
-
-  void clearChat() {
-    _chatMessages = [];
-    _chatError = null;
-    notifyListeners();
+    try {
+      final result = await PortalApi.syncGrades(reports);
+      if (result['success'] == true) {
+        _loadedGrades = Map<String, List<SubjectGrade>>.from(result['grades'] as Map);
+        _offlineService.saveGrades(_loadedGrades);
+      } else {
+        _error = result['error']?.toString() ?? 'Failed to sync grades.';
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSyncingGrades = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadNotifications() async {
@@ -950,7 +899,10 @@ class AppState extends ChangeNotifier {
 
     final result = await PortalApi.getGrades(report.href, reportName: report.text);
     if (result['success'] == true) {
-      _loadedGrades[report.href] = result['subjects'] as List<SubjectGrade>;
+      final semester = GradePolicy.semesterLabel(report.text);
+      _loadedGrades[report.href] = (result['subjects'] as List<SubjectGrade>)
+          .map((grade) => grade.copyWith(semester: semester))
+          .toList();
       _offlineService.saveGrades(_loadedGrades);
     }
     _loadingSemesterHref = null;
@@ -961,11 +913,5 @@ class AppState extends ChangeNotifier {
   void dispose() {
     _connectivitySub?.cancel();
     super.dispose();
-  }
-}
-
-extension ChatMessageCopy on ChatMessage {
-  ChatMessage copyWith({String? content, String? status}) {
-    return ChatMessage(id: id, role: role, content: content ?? this.content, status: status ?? this.status, tools: tools);
   }
 }

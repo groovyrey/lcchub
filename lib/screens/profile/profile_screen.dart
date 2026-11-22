@@ -46,9 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Icon(PhosphorIcons.warningCircle(), size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
                 const SizedBox(height: 12),
-                Text(_error!, style: GoogleFonts.poppins(color: AppColors.onSurfaceVariant)),
+                Text(_error!, style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant)),
                 const SizedBox(height: 16),
-                TextButton(onPressed: _loadData, child: Text('Retry', style: GoogleFonts.poppins())),
+                TextButton(onPressed: _loadData, child: Text('Retry', style: GoogleFonts.plusJakartaSans())),
               ],
             ))
           : CustomScrollView(
@@ -104,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(radius * 0.4),
               child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             )
-          : Text(initials, style: GoogleFonts.poppins(fontSize: radius * 0.8, fontWeight: FontWeight.bold, color: Colors.white)),
+          : Text(initials, style: GoogleFonts.plusJakartaSans(fontSize: radius * 0.8, fontWeight: FontWeight.bold, color: Colors.white)),
     );
 
     if (!widget.isOwner) return avatar;
@@ -159,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loadData();
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.poppins(fontSize: 13)),
+      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.plusJakartaSans(fontSize: 13)),
     ));
   }
 
@@ -174,9 +174,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           const SizedBox(height: 16),
-          Text(name, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(name, style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(widget.userId, style: GoogleFonts.poppins(fontSize: 13, color: AppColors.onSurfaceVariant)),
+          Text(widget.userId, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurfaceVariant)),
           if (course != null) ...[
             const SizedBox(height: 8),
             Row(
@@ -196,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -216,8 +216,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Icon(icon, size: 20, color: AppColors.primary),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-        Text(label, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+        Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
       ],
     );
   }
@@ -227,14 +227,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500)),
+          Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -257,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Badges', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Badges', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -271,7 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: color.withValues(alpha: 0.3)),
                   ),
                   child: Row(
@@ -279,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Icon(icon, size: 16, color: color),
                       const SizedBox(width: 6),
-                      Text(label, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+                      Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
                     ],
                   ),
                 );
@@ -307,12 +307,12 @@ class _ProfileSkeleton extends StatelessWidget {
           const SizedBox(height: 8),
           Container(width: 80, height: 14, decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(4))),
           const SizedBox(height: 20),
-          Container(width: double.infinity, height: 80, decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16))),
+          Container(width: double.infinity, height: 80, decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(8))),
           const SizedBox(height: 24),
           ...List.generate(2, (_) => Container(
             margin: const EdgeInsets.only(bottom: 10),
             height: 80,
-            decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.surfaceVariant.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(8)),
           )),
         ],
       ),

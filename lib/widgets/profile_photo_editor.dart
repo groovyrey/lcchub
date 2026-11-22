@@ -49,7 +49,7 @@ Future<Object?> showProfilePhotoEditor({
             ),
           ),
           const SizedBox(height: 16),
-          Text('Profile Photo', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('Profile Photo', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           _option(ctx, PhosphorIcons.camera(), 'Take Photo', _SheetChoice.camera),
           _option(ctx, PhosphorIcons.images(), 'Choose from Gallery', _SheetChoice.gallery),
@@ -112,7 +112,7 @@ Widget _option(BuildContext context, IconData icon, String label, _SheetChoice c
     ),
     title: Text(
       label,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: isRemove

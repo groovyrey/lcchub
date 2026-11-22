@@ -93,7 +93,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
           children: [
             Icon(PhosphorIcons.calendarX(), size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
-            Text('No classes scheduled yet.', style: GoogleFonts.poppins(fontSize: 15, color: AppColors.onSurfaceVariant)),
+            Text('No classes scheduled yet.', style: GoogleFonts.plusJakartaSans(fontSize: 15, color: AppColors.onSurfaceVariant)),
           ],
         ),
       );
@@ -108,7 +108,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
             children: [
               Icon(PhosphorIcons.calendar(), size: 20, color: AppColors.onSurfaceVariant),
               const SizedBox(width: 8),
-              Text('Schedule', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Schedule', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
               const Spacer(),
               _viewToggle(),
             ],
@@ -117,7 +117,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
           Container(
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.cardBorder),
             ),
             clipBehavior: Clip.antiAlias,
@@ -159,7 +159,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
             const SizedBox(width: 4),
             Text(
               label,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: active ? AppColors.primary : AppColors.onSurfaceVariant,
@@ -202,7 +202,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
             decoration: _cellDecor(color: AppColors.surfaceVariant.withValues(alpha: 0.5)),
             child: Text(
               hour.split(' ').first,
-              style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+              style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
             ),
           ),
       ],
@@ -273,7 +273,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
               color: isToday ? AppColors.primary : AppColors.onSurfaceVariant,
@@ -312,7 +312,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600),
                 ),
                 if (_getDisplayTitle(item) != _getSubjectCode(item.subject)) ...[
                   const SizedBox(height: 2),
@@ -321,7 +321,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(fontSize: 9, color: AppColors.onSurfaceVariant),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 9, color: AppColors.onSurfaceVariant),
                   ),
                 ],
                 const SizedBox(height: 2),
@@ -330,7 +330,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 9,
                     color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
                   ),
@@ -378,7 +378,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
         children: [
           Text(
             day.toUpperCase(),
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 1,
@@ -395,7 +395,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
               ),
               child: Text(
                 'Today',
-                style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.primary),
+                style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.primary),
               ),
             ),
         ],
@@ -435,7 +435,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                     const SizedBox(height: 2),
                     Text(
                       hourLabel,
-                      style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -447,14 +447,14 @@ class _ScheduleTableState extends State<ScheduleTable> {
                   children: [
                     Text(
                       _getSubjectCode(item.subject),
-                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _getDisplayTitle(item),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 6),
                     Wrap(
@@ -488,7 +488,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.poppins(fontSize: 11, color: AppColors.onSurfaceVariant),
+          style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant),
         ),
       ],
     );
@@ -524,7 +524,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                 Text(
                   _getSubjectName(item.subject),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
@@ -539,7 +539,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                       ),
                       child: Text(
                         _getSubjectCode(item.subject),
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -554,7 +554,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                       ),
                       child: Text(
                         'Section ${item.section.isNotEmpty ? item.section : 'TBA'}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -589,11 +589,11 @@ class _ScheduleTableState extends State<ScheduleTable> {
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(46),
                     side: BorderSide(color: AppColors.outline),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: Text(
                     'DISMISS',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
@@ -616,7 +616,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
         Container(
           width: 40,
           height: 40,
-          decoration: BoxDecoration(color: AppColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: AppColors.surfaceVariant, borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         ),
         const SizedBox(width: 12),
@@ -626,7 +626,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
             children: [
               Text(
                 label.toUpperCase(),
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
@@ -634,7 +634,7 @@ class _ScheduleTableState extends State<ScheduleTable> {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(value, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -661,14 +661,14 @@ class _ScheduleTableState extends State<ScheduleTable> {
           children: [
             Text(
               label.toUpperCase(),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 8,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
                 color: AppColors.onSurfaceVariant,
               ),
             ),
-            Text(value, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold)),
+            Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold)),
           ],
         ),
       ],

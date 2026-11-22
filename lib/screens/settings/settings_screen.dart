@@ -59,12 +59,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (s != null) ...[
           InkWell(
             onTap: _photoBusy ? null : _editPhoto,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [AppColors.primary, AppColors.gradientEnd]),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
@@ -74,10 +74,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(s.name, style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
-                        Text('ID: ${s.id}', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
+                        Text(s.name, style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text('ID: ${s.id}', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.white.withValues(alpha: 0.75))),
                         if (s.course.isNotEmpty)
-                          Text(s.course, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
+                          Text(s.course, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
                       ],
                     ),
                   ),
@@ -87,7 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
         ],
-        Text('Preferences', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+        Text('Preferences', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
         const SizedBox(height: 8),
         Card(
           child: Column(
@@ -155,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Account', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+        Text('Account', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
         const SizedBox(height: 8),
         Card(
           child: ListTile(
@@ -164,8 +164,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), shape: BoxShape.circle),
               child: Icon(PhosphorIcons.signOut(), color: AppColors.error, size: 20),
             ),
-            title: Text('Sign Out', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error)),
-            subtitle: Text('Log out of your account', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+            title: Text('Sign Out', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error)),
+            subtitle: Text('Log out of your account', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
             onTap: () => _showLogoutDialog(context),
           ),
         ),
@@ -192,8 +192,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Appearance', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500)),
-                Text(_themeModeLabel(current), style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                Text('Appearance', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w500)),
+                Text(_themeModeLabel(current), style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
               ],
             ),
           ),
@@ -250,8 +250,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500)),
-                Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w500)),
+                Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.onSurfaceVariant)),
               ],
             ),
           ),
@@ -277,7 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
               : Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
-                  style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
         ),
         Positioned(
           bottom: -2,
@@ -312,7 +312,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() => _photoBusy = false);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.poppins(fontSize: 13)),
+      content: Text(success ? 'Profile photo updated' : 'Could not update photo', style: GoogleFonts.plusJakartaSans(fontSize: 13)),
     ));
   }
 
@@ -320,17 +320,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Sign Out', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to sign out?', style: GoogleFonts.poppins()),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Sign Out', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to sign out?', style: GoogleFonts.plusJakartaSans()),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: GoogleFonts.poppins())),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: GoogleFonts.plusJakartaSans())),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               widget.onLogout();
             },
-            child: Text('Sign Out', style: GoogleFonts.poppins(color: AppColors.error, fontWeight: FontWeight.w600)),
+            child: Text('Sign Out', style: GoogleFonts.plusJakartaSans(color: AppColors.error, fontWeight: FontWeight.w600)),
           ),
         ],
       ),

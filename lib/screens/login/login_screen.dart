@@ -60,20 +60,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('LCC Hub', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text('LCC Hub', style: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
                   const SizedBox(height: 4),
-                  Text('Student Portal', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white.withValues(alpha: 0.8))),
+                  Text('Student Portal', style: GoogleFonts.plusJakartaSans(fontSize: 16, color: Colors.white.withValues(alpha: 0.8))),
                   const SizedBox(height: 48),
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(8),
                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 10))],
                     ),
                     child: Column(
                       children: [
-                        Text('Sign In', style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                        Text('Sign In', style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                         const SizedBox(height: 24),
                         TextField(
                           controller: _userIdController,
@@ -81,8 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: InputDecoration(
                             labelText: 'Student ID',
                             prefixIcon: Icon(PhosphorIcons.user()),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -96,8 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               icon: Icon(_obscurePassword ? PhosphorIcons.eyeSlash() : PhosphorIcons.eye()),
                               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
                           ),
                           onSubmitted: (_) => _login(),
                         ),
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [
                                 Icon(PhosphorIcons.warningCircle(), color: AppColors.error, size: 20),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text(widget.error!, style: GoogleFonts.poppins(color: AppColors.error, fontSize: 13))),
+                                Expanded(child: Text(widget.error!, style: GoogleFonts.plusJakartaSans(color: AppColors.error, fontSize: 13))),
                               ],
                             ),
                           ),
@@ -124,12 +124,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.surface,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               elevation: 0,
                             ),
                             child: widget.isLoading
                                 ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.surface, strokeWidth: 2))
-                                : Text('Sign In', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+                                : Text('Sign In', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600)),
                           ),
                         ),
                       ],

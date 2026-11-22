@@ -15,6 +15,7 @@ class Student {
   final Financials? financials;
   final List<SemesterGrade>? grades;
   final List<ReportLink>? availableReports;
+  final List<SubjectGrade>? allGrades;
   final List<String>? badges;
   final StudentSettings? settings;
 
@@ -37,6 +38,7 @@ class Student {
     this.financials,
     this.grades,
     this.availableReports,
+    this.allGrades,
     this.badges,
     this.settings,
   });
@@ -48,7 +50,10 @@ class Student {
       address: address, mobile: mobile, enrollmentDate: enrollmentDate,
       schoolYear: schoolYear, yearLevel: yearLevel, semester: semester,
       section: section, schedule: schedule, financials: financials,
-      grades: grades, availableReports: availableReports, badges: badges,
+      grades: grades,
+      availableReports: availableReports,
+      allGrades: allGrades,
+      badges: badges,
       settings: settings ?? this.settings,
     );
   }
@@ -71,6 +76,7 @@ class Student {
       financials: json['financials'] != null ? Financials.fromJson(json['financials']) : null,
       grades: (json['grades'] as List?)?.map((e) => SemesterGrade.fromJson(e)).toList(),
       availableReports: (json['availableReports'] as List?)?.map((e) => ReportLink.fromJson(e)).toList(),
+      allGrades: (json['allGrades'] as List?)?.map((e) => SubjectGrade.fromJson(e)).toList(),
       badges: (json['badges'] as List?)?.map((e) => e.toString()).toList(),
       settings: json['settings'] != null ? StudentSettings.fromJson(json['settings']) : null,
     );
@@ -230,6 +236,7 @@ class SubjectGrade {
   final String grade;
   final String? units;
   final String remarks;
+  final String? semester;
 
   SubjectGrade({
     this.code = '',
@@ -238,6 +245,7 @@ class SubjectGrade {
     this.grade = '',
     this.units,
     this.remarks = '',
+    this.semester,
   });
 
   factory SubjectGrade.fromJson(Map<String, dynamic> json) {
@@ -248,6 +256,27 @@ class SubjectGrade {
       grade: json['grade'] ?? '',
       units: json['units'],
       remarks: json['remarks'] ?? '',
+      semester: json['semester'],
+    );
+  }
+
+  SubjectGrade copyWith({
+    String? code,
+    String? description,
+    String? section,
+    String? grade,
+    String? units,
+    String? remarks,
+    String? semester,
+  }) {
+    return SubjectGrade(
+      code: code ?? this.code,
+      description: description ?? this.description,
+      section: section ?? this.section,
+      grade: grade ?? this.grade,
+      units: units ?? this.units,
+      remarks: remarks ?? this.remarks,
+      semester: semester ?? this.semester,
     );
   }
 }
@@ -309,22 +338,6 @@ class StudentSettings {
     'classReminders': classReminders,
     'paymentReminders': paymentReminders,
   };
-}
-
-class ChatMessage {
-  final String id;
-  final String role;
-  final String content;
-  final String? status;
-  final List<String> tools;
-
-  ChatMessage({
-    this.id = '',
-    this.role = 'user',
-    this.content = '',
-    this.status,
-    this.tools = const [],
-  });
 }
 
 class AppNotification {
