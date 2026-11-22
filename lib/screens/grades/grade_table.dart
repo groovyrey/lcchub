@@ -27,7 +27,6 @@ class GradeTable extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Table(
-        defaultRowHeight: 52,
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         columnWidths: const {
           0: FixedColumnWidth(104),

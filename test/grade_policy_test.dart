@@ -47,6 +47,6 @@ void main() {
     expect(summary.highest, '1.00');
     expect(summary.trend.first.score, closeTo(96, 0.001));
     expect(summary.trend.last.score, closeTo(90.625, 0.001));
-    expect(summary.trend.first.score, isNot(closeTo(summary.trend.last.score, 0.001)));
+    expect(summary.trend.first.score, isNot(closeTo(summary.trend.last.score!, 0.001)));
   });
 }
